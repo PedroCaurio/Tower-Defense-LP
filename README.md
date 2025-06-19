@@ -115,7 +115,7 @@ Adotamos um fluxo de trabalho de *feature branching* com foco em colaboração e
   * **Bibliotecas Externas (Love2D):**
       * **[hump.gamestate](https://github.com/vrld/hump)**: Gerenciamento de estados do jogo.
       * **[bump](https://github.com/kikito/bump.lua)**: Biblioteca de colisão 2D.
-      * **[jumper](https://www.google.com/search?q=https://github.com/a-lucas/jumper)**: Biblioteca de *pathfinding* (algoritmo A\*).
+      * **[jumper](https://github.com/Yonaba/Jumper)**: Biblioteca de *pathfinding* (algoritmo A\*).
       * **[anim8](https://github.com/kikito/anim8)**: Gerenciamento de animações por *spritesheet*.
       * **[Guified](https://www.google.com/search?q=https://github.com/rxi/guified)** ou **[Slab](https://www.google.com/search?q=https://github.com/rxi/slab)**: (A ser definida pela equipe) Biblioteca para elementos de UI.
 
