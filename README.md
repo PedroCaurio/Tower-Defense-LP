@@ -125,10 +125,10 @@ Adotamos um fluxo de trabalho de *feature branching* com foco em colaboração e
 
 Este projeto está sendo desenvolvido por:
 
-  * **[Nome do Membro 1](Link para GitHub/LinkedIn)** - Função no Projeto (Ex: Programador Core)
-  * **[Nome do Membro 2](Link para GitHub/LinkedIn)** - Função no Projeto (Ex: Programador de Inimigos/AI)
-  * **[Nome do Membro 3](Link para GitHub/LinkedIn)** - Função no Projeto (Ex: Programador de Soldados/Combate)
-  * **[Nome do Membro 4](Link para GitHub/LinkedIn)** - Função no Projeto (Ex: Designer/QA)
+  * **Felipe Fagundes (https://github.com/FelipeFagundesCosta)** 
+  * **Gabriel Silva (https://github.com/mathyc0de)** 
+  * **Matheus Pimenta (https://github.com/mathyc0de)** 
+  * **Pedro Caurio (https://github.com/PedroCaurio)** 
 
 -----
 
@@ -182,11 +182,3 @@ Este projeto é open-source e está licenciado sob a [MIT License](https://www.g
 Gostaríamos de agradecer à comunidade Love2D e aos desenvolvedores das bibliotecas utilizadas por tornarem o desenvolvimento de jogos tão acessível e divertido\!
 
 -----
-
-**Dicas adicionais para o seu `README.md`:**
-
-  * **Screenshots/GIFs:** Assim que tiverem algo visual, adicionem capturas de tela ou um GIF do jogo em ação na seção de Visão Geral. Isso é extremamente atraente.
-  * **Badges:** Considerem adicionar *badges* no topo do README para mostrar o status da *build*, licença, etc. (ex: [](https://opensource.org/licenses/MIT)).
-  * **Seção de FAQ (Opcional):** Se perceberem que perguntas comuns surgem, podem adicionar uma seção de perguntas frequentes.
-
-Este `README.md` oferece um ponto de partida sólido para o seu projeto. Boa sorte com o desenvolvimento\!
