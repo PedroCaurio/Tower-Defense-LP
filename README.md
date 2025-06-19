@@ -2,7 +2,7 @@
 
 ## 🛡️ Visão Geral do Projeto
 
-`Defesa do Reino` é um jogo de *Tower Defense* desenvolvido em **Love2D** e programado em **Lua**. Nosso objetivo é criar uma experiência estratégica onde os jogadores devem defender uma estrutura central contra hordas implacáveis de inimigos, recrutando soldados e aprimorando suas defesas. Este projeto está sendo desenvolvido por uma equipe de 4 alunos do terceiro ano de computação, com um prazo de 1 mês.
+O projeto é um jogo de *Tower Defense* desenvolvido em **Love2D** e programado em **Lua**. Nosso objetivo é criar uma experiência estratégica onde os jogadores devem defender uma estrutura na esquerda contra hordas de inimigos, recrutando soldados e aprimorando suas defesas. Este projeto está sendo desenvolvido por uma equipe de 4 alunos do terceiro ano de computação, com um prazo de 1 mês.
 
 -----
 
