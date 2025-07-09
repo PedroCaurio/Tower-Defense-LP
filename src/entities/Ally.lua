@@ -1,19 +1,19 @@
-local Enemy = {}
-Enemy.__index = Enemy
+local Ally = {}
+Ally.__index = Ally
 
 -- Define os tipos de aliados com seus atributos
-local EnemyTypes = {
-    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0, 1, 0} },
-    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {1, 0, 0} },
-    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0, 0, 1} },
+local allyTypes = {
+    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0, 0.8, 0} },
+    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {0.8, 0, 0} },
+    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0, 0, 0.8} },
 }
 
--- Construtor do Enemy
-function Enemy.create(type, x, y)
-    local stats = EnemyTypes[type]
-    assert(stats, "Tipo de inimigo inválido: " .. tostring(type))
+-- Construtor do Ally
+function Ally.create(type, x, y)
+    local stats = allyTypes[type]
+    assert(stats, "Tipo de aliado inválido: " .. tostring(type))
 
-    local enemy = {
+    local ally = {
         type = type,
         x = x,
         y = y,
@@ -28,22 +28,22 @@ function Enemy.create(type, x, y)
         timeSinceAttack = 0
     }
 
-    return setmetatable(enemy, Enemy)
+    return setmetatable(ally, Ally)
 end
 
 -- Atualiza posição e ataque
-function Enemy:update(dt, allies)
+function Ally:update(dt, enemies)
     if not self.alive then return end
 
     self.timeSinceAttack = self.timeSinceAttack + dt
 
     -- Verifica se há inimigos próximos para atacar
     local attacked = false
-    for _, ally in ipairs(allies) do
-        if ally.alive and math.abs(self.x - ally.x) < 25 then
+    for _, enemy in ipairs(enemies) do
+        if enemy.alive and math.abs(self.x - enemy.x) < 25 then
             -- Atacar se estiver perto o suficiente
             if self.timeSinceAttack >= self.attackCooldown then
-                ally:takeDamage(self.damage)
+                enemy:takeDamage(self.damage)
                 self.timeSinceAttack = 0
             end
             attacked = true
@@ -53,12 +53,12 @@ function Enemy:update(dt, allies)
 
     -- Se não atacou, continua andando
     if not attacked then
-        self.x = self.x - self.speed * dt
+        self.x = self.x + self.speed * dt
     end
 end
 
 -- Desenha aliado e barra de vida
-function Enemy:draw()
+function Ally:draw()
     if not self.alive then return end
 
     -- Corpo
@@ -78,7 +78,7 @@ function Enemy:draw()
 end
 
 -- Sofrer dano
-function Enemy:takeDamage(dmg)
+function Ally:takeDamage(dmg)
     self.health = self.health - dmg
     if self.health <= 0 then
         self.alive = false
@@ -86,8 +86,8 @@ function Enemy:takeDamage(dmg)
 end
 
 -- Retorna o custo do tipo
-function Enemy.getCost(type)
-    return EnemyTypes[type] and EnemyTypes[type].cost or math.huge
+function Ally.getCost(type)
+    return allyTypes[type] and allyTypes[type].cost or math.huge
 end
 
-return Enemy
+return Ally
