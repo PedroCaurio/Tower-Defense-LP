@@ -1,0 +1,1 @@
+local game = require("src/main_game")
