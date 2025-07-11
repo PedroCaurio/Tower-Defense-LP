@@ -1,7 +1,5 @@
 local Gamestate = require "lib.hump-master.gamestate"
 
-local gameover = require "src.states.GameOverState"
-
 local Ally = require("src/entities/Ally")
 local Enemy = require("src/entities/Enemy")
 local Structure = require("src.entities.Structure") -- Caminho corrigido e sem .lua
@@ -108,7 +106,7 @@ function PlayState:keypressed(key)
     end
     
     if key == "escape" then
-        Gamestate.switch(gameover)
+        Gamestate.switch(require("src.states.GameOverState"))
     end
 end
 
