@@ -1,6 +1,4 @@
 -- src/main_game.lua
-
-local PlayState = require("src/states/PlayState")
 local Gamestate = require "lib.hump-master.gamestate"
 
 local menu = require "src.states.MenuState"
@@ -9,5 +7,5 @@ local gameover = require "src.states.GameOverState"
 
 function love.load()
     Gamestate.registerEvents()
-    Gamestate.switch(play:new())
+    Gamestate.switch(menu)
 end
