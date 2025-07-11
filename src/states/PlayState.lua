@@ -1,5 +1,10 @@
+local Gamestate = require "lib.hump-master.gamestate"
+
+local gameover = require "src.states.GameOverState"
+
 local Ally = require("src/entities/Ally")
 local Enemy = require("src/entities/Enemy")
+local Structure = require("src.entities.Structure") -- Caminho corrigido e sem .lua
 
 local PlayState = {}
 PlayState.__index = PlayState
@@ -8,14 +13,26 @@ function PlayState:new()
     local state = {
         allies = {},
         enemies = {},
+        structures = {},
         money = 50,
         enemySpawnTimer = 0,
         enemySpawnInterval = 3  -- Inimigos aparecem a cada 3 segundos
     }
+    local myStructure = Structure:new(100, 100, {
+    health = 200,
+    width = 50,
+    height = 100
+    })
+    table.insert(state.structures, myStructure)
     return setmetatable(state, PlayState)
 end
 
 function PlayState:update(dt)
+    for i = #self.structures, 1, -1 do
+        local structure = self.structures[i]
+        structure:update(dt)
+    end
+    
     -- Atualiza aliados
     for i = #self.allies, 1, -1 do
         local ally = self.allies[i]
@@ -48,6 +65,16 @@ function PlayState:update(dt)
 end
 
 function PlayState:draw()
+    for i = #self.structures, 1, -1 do
+        local structure = self.structures[i]
+        if structure.isAlive then
+            structure:draw()
+        else
+            table.remove(self.structures, i)
+        end
+    end
+
+
     -- Desenhar aliados
     for _, ally in ipairs(self.allies) do
         ally:draw()
@@ -78,6 +105,10 @@ function PlayState:keypressed(key)
     elseif key == "d" and self.money >= Ally.getCost("ninja") then
         table.insert(self.allies, Ally.create("ninja", 0, 300))
         self.money = self.money - Ally.getCost("ninja")
+    end
+    
+    if key == "escape" then
+        Gamestate.switch(gameover)
     end
 end
 
