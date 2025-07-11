@@ -32,7 +32,7 @@ function Enemy.create(type, x, y)
 end
 
 -- Atualiza posição e ataque
-function Enemy:update(dt, allies)
+function Enemy:update(dt, allies, structures)
     if not self.alive then return end
 
     self.timeSinceAttack = self.timeSinceAttack + dt
@@ -44,6 +44,18 @@ function Enemy:update(dt, allies)
             -- Atacar se estiver perto o suficiente
             if self.timeSinceAttack >= self.attackCooldown then
                 ally:takeDamage(self.damage)
+                self.timeSinceAttack = 0
+            end
+            attacked = true
+            break
+        end
+    end
+
+    for _, structure in ipairs(structures) do
+        if structure.alive and math.abs(self.x - structure.x) < 25 then
+            -- Atacar se estiver perto o suficiente
+            if self.timeSinceAttack >= self.attackCooldown then
+                structure:takeDamage(self.damage)
                 self.timeSinceAttack = 0
             end
             attacked = true
