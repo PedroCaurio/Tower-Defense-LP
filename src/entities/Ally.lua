@@ -50,7 +50,7 @@ function Ally:update(dt, enemies)
             break
         end
     end
-
+    
     -- Se não atacou, continua andando
     if not attacked then
         self.x = self.x + self.speed * dt
