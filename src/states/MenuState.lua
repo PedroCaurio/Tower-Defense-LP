@@ -1,7 +1,7 @@
 local Gamestate = require "lib.hump-master.gamestate"
 local menu = {}
 
-function menu:enter()
+function menu:load()
 end
 
 function menu:draw()
@@ -10,7 +10,7 @@ end
 
 function menu:keypressed(key)
     if key == "return" then
-        Gamestate.switch(require("src.states.PlayState"):new())
+        Gamestate.switch(require("src.states.PlayState"):load())
     end
 end
 

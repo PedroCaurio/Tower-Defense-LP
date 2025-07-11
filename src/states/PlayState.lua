@@ -7,7 +7,7 @@ local Structure = require("src.entities.Structure") -- Caminho corrigido e sem .
 local PlayState = {}
 PlayState.__index = PlayState
 
-function PlayState:new()
+function PlayState:load()
     local state = {
         allies = {},
         enemies = {},
