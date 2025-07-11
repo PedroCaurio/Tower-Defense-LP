@@ -16,11 +16,7 @@ function PlayState:load()
         enemySpawnTimer = 0,
         enemySpawnInterval = 3  -- Inimigos aparecem a cada 3 segundos
     }
-    local myStructure = Structure:new(100, 100, {
-    health = 200,
-    width = 50,
-    height = 100
-    })
+    local myStructure = Structure.create("base", 50, 300)
     table.insert(state.structures, myStructure)
     return setmetatable(state, PlayState)
 end
@@ -44,7 +40,7 @@ function PlayState:update(dt)
     -- Atualiza inimigos
     for i = #self.enemies, 1, -1 do
         local enemy = self.enemies[i]
-        enemy:update(dt, self.allies)
+        enemy:update(dt, self.allies, self.structures)
 
         if not enemy.alive or enemy.x < 0 then
             table.remove(self.enemies, i)
@@ -65,10 +61,11 @@ end
 function PlayState:draw()
     for i = #self.structures, 1, -1 do
         local structure = self.structures[i]
-        if structure.isAlive then
+        if structure.alive then
             structure:draw()
         else
             table.remove(self.structures, i)
+            Gamestate.switch(require("src.states.GameOverState"))
         end
     end
 
@@ -103,10 +100,6 @@ function PlayState:keypressed(key)
     elseif key == "d" and self.money >= Ally.getCost("ninja") then
         table.insert(self.allies, Ally.create("ninja", 0, 300))
         self.money = self.money - Ally.getCost("ninja")
-    end
-    
-    if key == "escape" then
-        Gamestate.switch(require("src.states.GameOverState"))
     end
 end
 
