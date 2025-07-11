@@ -8,11 +8,11 @@ local Enemy = {}
 setmetatable(Enemy, {__index = Unit})
 Enemy.__index = Enemy
 
--- Tabela de atributos específicos para cada tipo de Inimigo
+-- Tabela de atributos com o valor da recompensa ('reward')
 local enemyTypes = {
-    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0.8, 0.5, 0} }, -- Cor diferente para distinguir
-    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {0.5, 0.2, 0.2} },
-    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0.3, 0.3, 0.3} },
+    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0.8, 0.5, 0}, reward = 5 },
+    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {0.5, 0.2, 0.2}, reward = 15 },
+    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0.3, 0.3, 0.3}, reward = 10 },
 }
 
 -- Construtor do Enemy
@@ -20,25 +20,26 @@ function Enemy.create(type, x, y)
     local stats = enemyTypes[type]
     assert(stats, "Tipo de inimigo inválido: " .. tostring(type))
 
-    -- 3. Prepara a configuração para passar para o construtor da classe pai (Unit)
     local config = {
         x = x, y = y,
         speed = stats.speed,
         health = stats.health,
         damage = stats.damage,
-        cost = stats.cost, -- Custo para a IA, pode ser útil no futuro
+        cost = stats.cost,
         color = stats.color
     }
 
-    -- 4. Cria a instância base usando Unit:new e depois define a metatable para Enemy
     local enemy = Unit:new(config)
     setmetatable(enemy, Enemy)
     enemy.type = type
     
+    -- Garante que a recompensa seja armazenada na instância do inimigo
+    enemy.reward = stats.reward or 0
+    
     return enemy
 end
 
--- Atualiza a lógica do Enemy, agora com capacidade de atacar aliados e a estrutura
+-- Atualiza a lógica do Enemy
 function Enemy:update(dt, allies, structure)
     if not self.alive then return end
 
@@ -72,9 +73,13 @@ function Enemy:update(dt, allies, structure)
     end
 end
 
--- Função estática para obter o custo de um tipo de inimigo (pode ser útil no WaveManager)
+-- Função estática para obter o custo
 function Enemy.getCost(type)
     return enemyTypes[type] and enemyTypes[type].cost or math.huge
 end
 
+-- ######################################################################
+-- A LINHA MAIS IMPORTANTE DO ARQUIVO!
+-- Garante que o 'require' receba a tabela 'Enemy' e não 'true'.
+-- ######################################################################
 return Enemy

@@ -1,161 +1,212 @@
 -- src/states/PlayState.lua
-
---[[
-    PlayState é o estado principal do jogo, onde toda a ação acontece.
-    Ele gerencia:
-    - As unidades (aliados e inimigos)
-    - A estrutura do jogador
-    - A economia (dinheiro)
-    - A interface do usuário (botões)
-    - As regras de spawn de inimigos
-    - As condições de fim de jogo
-]]
-
 local Gamestate = require "lib.hump-master.gamestate"
 
--- 1. Importando todos os módulos necessários
 local Ally = require("src.entities.Ally")
 local Enemy = require("src.entities.Enemy")
-local Structure = require("src.entities.Structure") 
+local Structure = require("src.entities.Structure")
 local Button = require("src.ui.Button")
 
 local PlayState = {}
 PlayState.__index = PlayState
 
--- A função load agora é responsável por criar o estado inicial do jogo
+-- ############### NOVA FUNÇÃO AUXILIAR ###############
+-- Esta função cria/recria os botões do painel de upgrade.
+-- Ela será chamada apenas quando precisarmos atualizar a UI dos upgrades.
+function PlayState:rebuildUpgradeUI()
+    self.uiUpgradeElements = {} -- Limpa a lista antiga
+    if not self.isUpgradePanelOpen then return end -- Se o painel está fechado, não faz nada
+
+    local yPos = 120
+    for key, upgrade in pairs(self.upgrades) do
+        local cost = math.floor(upgrade.baseCost * (upgrade.costMultiplier ^ upgrade.level))
+        local text = upgrade.name .. " (Lvl " .. upgrade.level .. ")\nCusto: $" .. cost
+        
+        local currentKey = key
+        local btn = Button.create(200, yPos, love.graphics.getWidth() - 400, 60, text, function()
+            self:purchaseUpgrade(currentKey)
+        end)
+        
+        table.insert(self.uiUpgradeElements, btn)
+        yPos = yPos + 80
+    end
+end
+-- ######################################################
+
 function PlayState:load()
     local state = {
         allies = {},
         enemies = {},
         structures = {},
-        uiElements = {}, -- Tabela para guardar os botões e outros elementos de UI
-        money = 100, -- Aumentei o dinheiro inicial para facilitar os testes
+        uiSpawnElements = {},
+        uiUpgradeElements = {}, -- Começa vazia
+        isUpgradePanelOpen = false,
+        money = 150,
         enemySpawnTimer = 0,
-        enemySpawnInterval = 5 -- Aumentei o intervalo inicial para dar um respiro
+        enemySpawnInterval = 5
     }
-    setmetatable(state, PlayState) -- Importante fazer isso antes de usar 'self' nas funções internas
+    setmetatable(state, PlayState)
 
-    -- 2. Criando a estrutura principal do jogador (o castelo)
-    -- Posicionei mais à esquerda e mais para baixo, para dar espaço para a ação
+    state.upgrades = {
+        soldierDamage = { name = "Dano Soldado", level = 0, baseCost = 50, costMultiplier = 1.6, value = 5 },
+        income = { name = "Renda Passiva", level = 0, baseCost = 100, costMultiplier = 2, value = 2 },
+        baseHealth = { name = "Vida da Base", level = 0, baseCost = 75, costMultiplier = 1.8, value = 250 }
+    }
+
     local playerStructure = Structure.create("base", 80, love.graphics.getHeight() - 150)
     table.insert(state.structures, playerStructure)
 
-    -- 3. Lógica de criação de botões para spawnar aliados
-    -- Função genérica para evitar repetição de código
     local function spawnAlly(allyType)
-        if state.money >= Ally.getCost(allyType) then
-            -- Spawna o aliado um pouco à frente da estrutura
-            table.insert(state.allies, Ally.create(allyType, 120, love.graphics.getHeight() - 100))
-            state.money = state.money - Ally.getCost(allyType)
-        else
-            -- Feedback futuro: tocar um som de "dinheiro insuficiente"
-            print("Dinheiro insuficiente para comprar: " .. allyType)
+        local bonusDamage = state.upgrades.soldierDamage.level * state.upgrades.soldierDamage.value
+        local bonusHealth = 0
+        local allyCost = Ally.getCost(allyType)
+        if state.money >= allyCost then
+            table.insert(state.allies, Ally.create(allyType, 120, love.graphics.getHeight() - 100, bonusDamage, bonusHealth))
+            state.money = state.money - allyCost
         end
     end
 
-    -- Criando os botões da UI
-    local soldadoCost = Ally.getCost("soldado")
-    local tankCost = Ally.getCost("tank")
-    local ninjaCost = Ally.getCost("ninja")
-
-    table.insert(state.uiElements, Button.create(10, 100, 120, 40, "Soldado ($"..soldadoCost..")", function() spawnAlly("soldado") end))
-    table.insert(state.uiElements, Button.create(10, 150, 120, 40, "Tank ($"..tankCost..")", function() spawnAlly("tank") end))
-    table.insert(state.uiElements, Button.create(10, 200, 120, 40, "Ninja ($"..ninjaCost..")", function() spawnAlly("ninja") end))
+    table.insert(state.uiSpawnElements, Button.create(10, 100, 120, 40, "Soldado", function() spawnAlly("soldado") end))
+    table.insert(state.uiSpawnElements, Button.create(10, 150, 120, 40, "Tank", function() spawnAlly("tank") end))
+    table.insert(state.uiSpawnElements, Button.create(10, 200, 120, 40, "Ninja", function() spawnAlly("ninja") end))
+    
+    -- ############### MUDANÇA NA LÓGICA DO BOTÃO ###############
+    -- Agora, além de mudar a flag, ele chama a função para construir a UI.
+    table.insert(state.uiSpawnElements, Button.create(10, 280, 120, 50, "UPGRADES", function()
+        state.isUpgradePanelOpen = not state.isUpgradePanelOpen
+        state:rebuildUpgradeUI()
+    end))
 
     return state
 end
 
+function PlayState:purchaseUpgrade(upgradeType)
+    local upgrade = self.upgrades[upgradeType]
+    if not upgrade then return end
+    local cost = math.floor(upgrade.baseCost * (upgrade.costMultiplier ^ upgrade.level))
+
+    if self.money >= cost then
+        self.money = self.money - cost
+        upgrade.level = upgrade.level + 1
+
+        if upgradeType == "baseHealth" then
+            local structure = self.structures[1]
+            structure.maxHealth = structure.maxHealth + upgrade.value
+            structure.health = structure.health + upgrade.value
+        end
+        print("Upgrade '" .. upgrade.name .. "' comprado! Nível: " .. upgrade.level)
+        
+        -- ############### ATUALIZA A UI APÓS A COMPRA ###############
+        self:rebuildUpgradeUI()
+    else
+        print("Dinheiro insuficiente para o upgrade: " .. upgrade.name)
+    end
+end
+
 function PlayState:update(dt)
-    -- 4. Lógica de Fim de Jogo
+    print("No início do update, o tipo de Enemy é: " .. type(Enemy)) -- <<< ADICIONE ESTA LINHA
+
     local playerStructure = self.structures[1]
-    
-    -- ############ CORREÇÃO AQUI ############
-    -- Alterado de 'playerStructure.isAlive' para 'playerStructure.alive'
     if not playerStructure.alive then
         Gamestate.switch(require("src.states.GameOverState"))
-        return -- Para a execução para evitar erros após a troca de estado
+        return
     end
-    -- #######################################
 
-    -- Atualiza a estrutura
-    playerStructure:update(dt)
+    if not self.isUpgradePanelOpen then
+        playerStructure:update(dt)
 
-    -- Atualiza aliados e remove os mortos ou que saíram da tela
-    for i = #self.allies, 1, -1 do
-        local ally = self.allies[i]
-        ally:update(dt, self.enemies)
-        if not ally.alive or ally.x > love.graphics.getWidth() then
-            table.remove(self.allies, i)
+        -- Atualiza aliados
+        for i = #self.allies, 1, -1 do
+            local ally = self.allies[i]
+            ally:update(dt, self.enemies)
+            if not ally.alive or ally.x > love.graphics.getWidth() then
+                table.remove(self.allies, i)
+            end
         end
-    end
 
-    -- 5. Atualiza inimigos (passando a estrutura como alvo) e remove os mortos
-    for i = #self.enemies, 1, -1 do
-        local enemy = self.enemies[i]
-        -- Passamos a lista de aliados E a estrutura do jogador como alvos potenciais
-        enemy:update(dt, self.allies, playerStructure)
-        if not enemy.alive or enemy.x < 0 then
-            table.remove(self.enemies, i)
+        -- Atualiza inimigos
+        for i = #self.enemies, 1, -1 do
+            local enemy = self.enemies[i] -- Note o 'e' minúsculo, que é o correto.
+            enemy:update(dt, self.allies, playerStructure)
+
+            -- Verifica se o inimigo morreu ou saiu da tela
+            if not enemy.alive or enemy.x < 0 then
+                -- Se o inimigo foi derrotado (e não apenas saiu da tela), dá a recompensa.
+                if not enemy.alive then
+                    self.money = self.money + (enemy.reward or 0)
+                end
+                -- Remove o inimigo do jogo
+                table.remove(self.enemies, i)
+            end
+        end
+
+        -- Lógica de economia e spawn
+        local incomeValue = 5 + (self.upgrades.income.level * self.upgrades.income.value)
+        self.money = self.money + incomeValue * dt
+        
+        self.enemySpawnTimer = self.enemySpawnTimer + dt
+        if self.enemySpawnTimer >= self.enemySpawnInterval then
+            self:spawnEnemy()
+            self.enemySpawnTimer = 0
         end
     end
     
-    -- 6. Atualiza os elementos da UI (para checar hover do mouse)
-    for _, element in ipairs(self.uiElements) do
-        element:update(dt)
-    end
-
-    -- Lógica de economia e spawn
-    self.money = self.money + dt * 5 -- Ganho passivo de dinheiro
-    self.enemySpawnTimer = self.enemySpawnTimer + dt
-    if self.enemySpawnTimer >= self.enemySpawnInterval then
-        self:spawnEnemy()
-        self.enemySpawnTimer = 0
+    -- Atualiza UI
+    for _, element in ipairs(self.uiSpawnElements) do element:update(dt) end
+    if self.isUpgradePanelOpen then
+        for _, element in ipairs(self.uiUpgradeElements) do element:update(dt) end
     end
 end
 
 function PlayState:draw()
-    -- Desenha um fundo simples para melhor visualização
     love.graphics.clear(0.4, 0.5, 0.6)
 
-    -- Desenha a estrutura, aliados e inimigos
     for _, s in ipairs(self.structures) do s:draw() end
     for _, a in ipairs(self.allies) do a:draw() end
     for _, e in ipairs(self.enemies) do e:draw() end
 
-    -- 7. Desenha a UI
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.setFont(love.graphics.newFont(16))
+    local incomeValue = 5 + (self.upgrades.income.level * self.upgrades.income.value)
     love.graphics.print("Dinheiro: $" .. math.floor(self.money), 10, 10)
+    love.graphics.print("Renda: $" .. incomeValue .. "/s", 10, 30)
+    for _, element in ipairs(self.uiSpawnElements) do element:draw() end
     
-    for _, element in ipairs(self.uiElements) do
-        element:draw()
+    -- ############### FUNÇÃO DRAW SIMPLIFICADA ###############
+    -- Agora ela apenas desenha, sem criar nada.
+    if self.isUpgradePanelOpen then
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 150, 50, love.graphics.getWidth() - 300, love.graphics.getHeight() - 100)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf("Painel de Upgrades", 150, 60, love.graphics.getWidth() - 300, "center")
+        
+        for _, element in ipairs(self.uiUpgradeElements) do element:draw() end
     end
+
+    love.graphics.setColor(1, 1, 1)
 end
 
--- 8. Removemos a lógica de spawn de unidades do teclado
+function PlayState:mousepressed(x, y, button)
+    if button ~= 1 then return end
+
+    if self.isUpgradePanelOpen then
+        for _, element in ipairs(self.uiUpgradeElements) do element:mousepressed(x, y, button) end
+    end
+    for _, element in ipairs(self.uiSpawnElements) do element:mousepressed(x, y, button) end
+end
+
 function PlayState:keypressed(key)
     if key == "escape" then
-        -- Por enquanto, vamos manter o escape para ir para a tela de game over (para testes)
         Gamestate.switch(require("src.states.MenuState"))
     end
 end
 
--- 9. Adicionamos a função de clique do mouse, essencial para os botões
-function PlayState:mousepressed(x, y, button)
-    if button == 1 then -- Apenas botão esquerdo do mouse
-        for _, element in ipairs(self.uiElements) do
-            element:mousepressed(x, y, button)
-        end
-    end
-end
-
--- Spawna inimigos automaticamente do lado direito, fora da tela
 function PlayState:spawnEnemy()
+    print("No início do spawnEnemy, o tipo de Enemy é: " .. type(Enemy)) -- <<< ADICIONE ESTA LINHA
+
     local enemyTypes = {"soldado", "tank", "ninja"}
     local randomType = enemyTypes[love.math.random(#enemyTypes)]
-    local x = love.graphics.getWidth() + 20 -- Spawna um pouco fora da tela
-    local y = love.graphics.getHeight() - 100 -- Na mesma altura das tropas aliadas
-
+    local x = love.graphics.getWidth() + 20
+    local y = love.graphics.getHeight() - 100
+    
+    -- Esta linha usa 'Enemy' (maiúsculo), que é a referência correta ao módulo.
     table.insert(self.enemies, Enemy.create(randomType, x, y))
 end
 
