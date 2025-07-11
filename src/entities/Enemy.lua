@@ -1,47 +1,54 @@
+-- src/entities/Enemy.lua
+
+-- 1. Importa a classe base Unit
+local Unit = require("src.entities.Unit")
+
+-- 2. Cria a classe Enemy e a faz herdar de Unit
 local Enemy = {}
+setmetatable(Enemy, {__index = Unit})
 Enemy.__index = Enemy
 
--- Define os tipos de aliados com seus atributos
-local EnemyTypes = {
-    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0, 1, 0} },
-    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {1, 0, 0} },
-    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0, 0, 1} },
+-- Tabela de atributos com o valor da recompensa ('reward')
+local enemyTypes = {
+    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0.8, 0.5, 0}, reward = 5 },
+    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {0.5, 0.2, 0.2}, reward = 15 },
+    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0.3, 0.3, 0.3}, reward = 10 },
 }
 
 -- Construtor do Enemy
 function Enemy.create(type, x, y)
-    local stats = EnemyTypes[type]
+    local stats = enemyTypes[type]
     assert(stats, "Tipo de inimigo inválido: " .. tostring(type))
 
-    local enemy = {
-        type = type,
-        x = x,
-        y = y,
+    local config = {
+        x = x, y = y,
         speed = stats.speed,
         health = stats.health,
-        maxHealth = stats.health,
         damage = stats.damage,
         cost = stats.cost,
-        color = stats.color,
-        alive = true,
-        attackCooldown = 1,  -- 1 segundo entre ataques
-        timeSinceAttack = 0
+        color = stats.color
     }
 
-    return setmetatable(enemy, Enemy)
+    local enemy = Unit:new(config)
+    setmetatable(enemy, Enemy)
+    enemy.type = type
+    
+    -- Garante que a recompensa seja armazenada na instância do inimigo
+    enemy.reward = stats.reward or 0
+    
+    return enemy
 end
 
--- Atualiza posição e ataque
-function Enemy:update(dt, allies, structures)
+-- Atualiza a lógica do Enemy
+function Enemy:update(dt, allies, structure)
     if not self.alive then return end
 
     self.timeSinceAttack = self.timeSinceAttack + dt
-
-    -- Verifica se há inimigos próximos para atacar
     local attacked = false
+
+    -- Prioridade 1: Atacar aliados próximos
     for _, ally in ipairs(allies) do
         if ally.alive and math.abs(self.x - ally.x) < 25 then
-            -- Atacar se estiver perto o suficiente
             if self.timeSinceAttack >= self.attackCooldown then
                 ally:takeDamage(self.damage)
                 self.timeSinceAttack = 0
@@ -51,55 +58,28 @@ function Enemy:update(dt, allies, structures)
         end
     end
 
-    for _, structure in ipairs(structures) do
-        if structure.alive and math.abs(self.x - structure.x) < 25 then
-            -- Atacar se estiver perto o suficiente
-            if self.timeSinceAttack >= self.attackCooldown then
-                structure:takeDamage(self.damage)
-                self.timeSinceAttack = 0
-            end
-            attacked = true
-            break
+    -- Prioridade 2: Se não atacou um aliado, verifica se pode atacar a estrutura
+    if not attacked and structure and structure.alive and math.abs(self.x - structure.x) < 40 then
+        if self.timeSinceAttack >= self.attackCooldown then
+            structure:takeDamage(self.damage)
+            self.timeSinceAttack = 0
         end
+        attacked = true
     end
 
-    -- Se não atacou, continua andando
+    -- Se não atacou ninguém, continua andando para a esquerda
     if not attacked then
         self.x = self.x - self.speed * dt
     end
 end
 
--- Desenha aliado e barra de vida
-function Enemy:draw()
-    if not self.alive then return end
-
-    -- Corpo
-    love.graphics.setColor(self.color)
-    love.graphics.rectangle("fill", self.x, self.y, 20, 20)
-
-    -- Barra de vida
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.rectangle("fill", self.x, self.y - 5, 20, 3)
-
-    love.graphics.setColor(0, 1, 0)
-    local lifeWidth = (self.health / self.maxHealth) * 20
-    love.graphics.rectangle("fill", self.x, self.y - 5, lifeWidth, 3)
-
-    -- Reset cor
-    love.graphics.setColor(1, 1, 1)
-end
-
--- Sofrer dano
-function Enemy:takeDamage(dmg)
-    self.health = self.health - dmg
-    if self.health <= 0 then
-        self.alive = false
-    end
-end
-
--- Retorna o custo do tipo
+-- Função estática para obter o custo
 function Enemy.getCost(type)
-    return EnemyTypes[type] and EnemyTypes[type].cost or math.huge
+    return enemyTypes[type] and enemyTypes[type].cost or math.huge
 end
 
+-- ######################################################################
+-- A LINHA MAIS IMPORTANTE DO ARQUIVO!
+-- Garante que o 'require' receba a tabela 'Enemy' e não 'true'.
+-- ######################################################################
 return Enemy
