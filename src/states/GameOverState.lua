@@ -2,7 +2,7 @@ local Gamestate = require "lib.hump-master.gamestate"
 
 local gameover = {}
 
-function gameover:enter()
+function gameover:load()
 end
 
 function gameover:draw()
