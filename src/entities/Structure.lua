@@ -1,4 +1,6 @@
 -- Structure.lua
+local Sprite = require("src.systems.Sprite")
+local animation = require("src.systems.animation")
 
 local Structure = {}
 Structure.__index = Structure
@@ -14,6 +16,7 @@ function Structure.create(type, x, y)
     local stats = StructureTypes[type]
     assert(stats, "Tipo de estrutura inválido: " .. tostring(type))
 
+    local structurePath = "assets/allies/tower/"
     local structure = {
         type = type,
         x = x,
@@ -29,7 +32,12 @@ function Structure.create(type, x, y)
         attackSpeed = stats.attackSpeed,
         timeSinceLastAttack = 0,
         color = stats.color,
-        image = nil  -- Pode ser configurado externamente se quiser imagem
+        sprite = Sprite:newSprite(
+        animation:newAnimation(structurePath.."1.png", 70, 130, 1),
+        animation:newAnimation(structurePath.."2.png", 70, 130, 1),
+        animation:newAnimation(structurePath.."3.png", 70, 130, 1),
+        true
+    )
     }
 
     return setmetatable(structure, Structure)
@@ -38,6 +46,8 @@ end
 -- Atualiza estrutura
 function Structure:update(dt)
     if not self.alive then return end
+
+    self.sprite:update(dt)
 
     if self.attackDamage > 0 and self.attackRange > 0 then
         self.timeSinceLastAttack = self.timeSinceLastAttack + dt
@@ -58,21 +68,16 @@ end
 function Structure:draw()
     if not self.alive then return end
 
-    if self.image then
-        love.graphics.draw(self.image, self.x, self.y, 0, 1, 1, self.image:getWidth() / 2, self.image:getHeight() / 2)
-    else
-        love.graphics.setColor(self.color)
-        love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height / 2, self.width, self.height)
-    end
+    self.sprite:draw(self.x, self.y)
 
     -- Barra de vida
     local barWidth = 40
     local barHeight = 5
     local currentWidth = (self.health / self.maxHealth) * barWidth
     love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - self.height / 2 - 10, barWidth, barHeight)
+    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - 5 / 2 - 10, barWidth, barHeight)
     love.graphics.setColor(0, 1, 0)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - self.height / 2 - 10, currentWidth, barHeight)
+    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - 5 / 2 - 10, currentWidth, barHeight)
 
     love.graphics.setColor(1, 1, 1) -- Reset cor
 end
@@ -80,6 +85,7 @@ end
 -- Recebe dano
 function Structure:takeDamage(amount)
     if not self.alive then return end
+
     self.health = self.health - amount
     if self.health <= 0 then
         self.health = 0

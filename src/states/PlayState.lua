@@ -52,7 +52,7 @@ function PlayState:load()
         baseHealth = { name = "Vida da Base", level = 0, baseCost = 75, costMultiplier = 1.8, value = 250 }
     }
 
-    local playerStructure = Structure.create("base", 80, love.graphics.getHeight() - 150)
+    local playerStructure = Structure.create("base", 80, love.graphics.getHeight() - 198)
     table.insert(state.structures, playerStructure)
 
     local function spawnAlly(allyType)
@@ -103,7 +103,7 @@ function PlayState:purchaseUpgrade(upgradeType)
 end
 
 function PlayState:update(dt)
-    print("No início do update, o tipo de Enemy é: " .. type(Enemy)) -- <<< ADICIONE ESTA LINHA
+    -- print("No início do update, o tipo de Enemy é: " .. type(Enemy)) -- <<< ADICIONE ESTA LINHA
 
     local playerStructure = self.structures[1]
     if not playerStructure.alive then
