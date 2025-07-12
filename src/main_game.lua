@@ -1,5 +1,5 @@
 -- src/main_game.lua
-local Gamestate = require "lib.hump-master.gamestate"
+local Gamestate = require "lib.hump.gamestate"
 
 local menu = require "src.states.MenuState"
 local play = require "src.states.PlayState"

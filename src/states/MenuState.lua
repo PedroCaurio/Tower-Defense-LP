@@ -1,4 +1,4 @@
-local Gamestate = require "lib.hump-master.gamestate"
+local Gamestate = require "lib.hump.gamestate"
 local menu = {}
 
 function menu:load()

@@ -1,5 +1,5 @@
 -- src/states/PlayState.lua
-local Gamestate = require "lib.hump-master.gamestate"
+local Gamestate = require "lib.hump.gamestate"
 
 local Ally = require("src.entities.Ally")
 local Enemy = require("src.entities.Enemy")
