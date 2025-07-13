@@ -10,65 +10,48 @@ setmetatable(Ally, {__index = Unit})
 Ally.__index = Ally
 
 -- 3. Configuração Central de Tropas (Data-Driven Design)
--- Esta tabela é a fonte da verdade para todas as tropas aliadas.
--- NOTA: Os caminhos dos assets e os frames das animações são placeholders. Ajuste-os conforme seus arquivos.
 local allyTypes = {
     soldado = {
-        stats = { speed = 50, health = 100, damage = 10 },
+        stats = { speed = 50, health = 100, damage = 10, color = {0.2, 0.6, 1} },
         costFood = 10,
         attackType = 'melee',
         attackRange = 35,
-        spriteSheetPath = "assets/allies/defenders/soldado/spritesheet.png", -- Exemplo de caminho
-        grid = {w = 64, h = 64}, -- Largura e altura de cada frame
+        spriteSheetPath = "assets/units/allies/Sword.png",
+        grid = {w = 32, h = 32},
+        -- ############ TESTE DE ANIMAÇÃO SIMPLIFICADO ############
+        -- Vamos usar a mesma animação de 'walk' para todos os estados.
+        -- Se o soldado aparecer andando, o sistema funciona.
         animations = {
-            walk = function(g) return anim8.newAnimation(g('1-6', 1), 0.1) end,
-            attack = function(g) return anim8.newAnimation(g('1-4', 2), 0.15) end,
-            idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
         }
+        -- ########################################################
+    },
+    -- O resto da tabela permanece igual para manter o foco no soldado
+    arqueiro = {
+        stats = { speed = 40, health = 70, damage = 12, color = {0.2, 0.8, 0.2} },
+        costFood = 25, attackType = 'ranged', attackRange = 250,
+        spriteSheetPath = "assets/units/allies/Archer.png", grid = {w = 32, h = 32}, animations = {}
     },
     tank = {
-        stats = { speed = 30, health = 300, damage = 15 },
-        costFood = 30,
-        attackType = 'melee',
-        attackRange = 35,
-        spriteSheetPath = "assets/allies/defenders/tank/spritesheet.png",
-        grid = {w = 64, h = 64},
-        animations = {
-            walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
-            attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
-            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
-        }
-    },
-    arqueiro = {
-        stats = { speed = 40, health = 70, damage = 12 },
-        costFood = 25,
-        attackType = 'ranged',
-        attackRange = 250,
-        spriteSheetPath = "assets/allies/defenders/arqueiro/spritesheet.png",
-        grid = {w = 64, h = 64},
-        animations = {} -- A preencher
+        stats = { speed = 30, health = 300, damage = 15, color = {0.8, 0.2, 0.2} },
+        costFood = 30, attackType = 'melee', attackRange = 40,
+        spriteSheetPath = "assets/units/allies/Spear.png", grid = {w = 32, h = 32}, animations = {}
     },
     ninja = {
-        stats = { speed = 80, health = 80, damage = 20 },
-        costFood = 25,
-        attackType = 'melee',
-        attackRange = 40,
-        spriteSheetPath = "assets/allies/defenders/ninja/spritesheet.png",
-        grid = {w = 64, h = 64},
-        animations = {} -- A preencher
+        stats = { speed = 80, health = 80, damage = 20, color = {0.1, 0.1, 0.1} },
+        costFood = 25, attackType = 'melee', attackRange = 40,
+        spriteSheetPath = "assets/units/allies/Mage.png", grid = {w = 32, h = 32}, animations = {}
     },
     rei = {
-        stats = { speed = 35, health = 800, damage = 50 },
-        costFood = 100,
-        attackType = 'melee',
-        attackRange = 45,
-        spriteSheetPath = "assets/allies/defenders/rei/spritesheet.png",
-        grid = {w = 64, h = 64},
-        animations = {} -- A preencher
+        stats = { speed = 35, health = 800, damage = 50, color = {1, 0.8, 0} },
+        costFood = 100, attackType = 'melee', attackRange = 45,
+        spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {}
     }
 }
 
--- Construtor do Ally
+-- O construtor permanece o mesmo, pois nossa arquitetura já é robusta
 function Ally.create(type, x, y, level, bonuses)
     local template = allyTypes[type]
     assert(template, "Tipo de aliado inválido: " .. tostring(type))
@@ -80,19 +63,16 @@ function Ally.create(type, x, y, level, bonuses)
         speed = template.stats.speed,
         health = (template.stats.health + (bonuses.health or 0)) * (1.15 ^ (level - 1)),
         damage = (template.stats.damage + (bonuses.damage or 0)) * (1.15 ^ (level - 1)),
-        color = template.stats.color -- Pega a cor dos stats
+        color = template.stats.color
     }
+    
     local allyAnimations = {}
     local spritesheet = nil
-    -- Carrega a spritesheet e cria o grid de animação
-    -- Fazemos isso aqui para que cada tipo de tropa carregue sua imagem apenas uma vez (a ser otimizado depois)
-    -- Verificamos se o arquivo de imagem existe ANTES de tentar carregá-lo.
-    if love.filesystem.getInfo(template.spriteSheetPath) then
+    
+    if template.spriteSheetPath and love.filesystem.getInfo(template.spriteSheetPath) then
         spritesheet = love.graphics.newImage(template.spriteSheetPath)
         local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
-        
         for name, creator in pairs(template.animations) do
-            -- Usamos pcall para capturar erros caso a animação peça um frame que não existe
             local ok, anim = pcall(function() return creator(grid):clone() end)
             if ok then
                 allyAnimations[name] = anim
@@ -104,73 +84,73 @@ function Ally.create(type, x, y, level, bonuses)
         print("AVISO: Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
     end
 
-    -- Cria a instância base, passando a configuração completa para Unit:new
     local ally = Unit:new({
         x = x, y = y,
+        width = template.grid.w, height = template.grid.h,
         speed = finalStats.speed,
         health = finalStats.health,
         maxHealth = finalStats.health,
         damage = finalStats.damage,
         cost = template.costFood,
-        color = finalStats.color, -- Passa a cor para o Unit
+        color = finalStats.color,
         animations = allyAnimations,
         flipped = false,
         spritesheet = spritesheet
     })
     
-    -- Adiciona as propriedades restantes, específicas do Ally
-    ally.type = type
-    ally.level = level
-    ally.attackType = template.attackType
-    ally.attackRange = template.attackRange
-    ally.state = 'walking' -- Estado inicial
+    ally.type, ally.level, ally.attackType, ally.attackRange, ally.state = type, level, template.attackType, template.attackRange, 'walking'
     
     return setmetatable(ally, Ally)
 end
 
--- 4. Função update simplificada
-function Ally:update(dt, enemies)
+-- A função update permanece a mesma, pois já estava correta
+function Ally:update(dt, enemies, enemyStructure, playState)
     if not self.alive then return end
-
-    -- Primeiro, delega a atualização da animação para a classe pai
     Unit.update(self, dt)
-
-    -- Lógica de IA e mudança de estado
-    local target = self:findTarget(enemies)
-
+    
+    local target = self:findTarget(enemies, enemyStructure)
+ 
     if target then
-        self.state = 'attacking'
+        self.state = 'attack'
     else
-        self.state = 'walking'
+        self.state = 'walk'
     end
 
-    -- Lógica de movimento e ataque
-    if self.state == 'walking' then
+    if self.state == 'walk' then
         self.x = self.x + self.speed * dt
-    elseif self.state == 'attacking' then
+    elseif self.state == 'attack' then
         self.timeSinceAttack = self.timeSinceAttack + dt
         if self.timeSinceAttack >= self.attackCooldown then
-            -- Futuramente, aqui você verificará o self.attackType
-            target:takeDamage(self.damage)
+            if self.attackType == 'ranged' then
+                if playState and playState.projectileManager then
+                    playState.projectileManager:create({ x = self.x, y = self.y - self.height / 2, damage = self.damage, target = target, owner = self })
+                end
+            else
+                target:takeDamage(self.damage)
+            end
             self.timeSinceAttack = 0
         end
     end
 end
 
-function Ally:findTarget(enemies)
+-- ############ LÓGICA DE ALVO CORRIGIDA ############
+function Ally:findTarget(enemies, enemyStructure)
+    -- Prioridade 1: Atacar inimigos próximos
     for _, enemy in ipairs(enemies) do
         if enemy.alive and math.abs(self.x - enemy.x) < self.attackRange then
             return enemy
         end
     end
+
+    -- Prioridade 2: Se não houver inimigos, atacar a torre inimiga se estiver no alcance
+    if enemyStructure and enemyStructure.alive and math.abs(self.x - enemyStructure.x) < self.attackRange then
+        return enemyStructure
+    end
+
     return nil
 end
+-- #################################################
 
--- 5. A FUNÇÃO DRAW FOI REMOVIDA.
--- Agora, Ally herda o método draw de Unit, que já desenha a animação e a barra de vida.
--- Menos código, menos bugs!
-
--- Função para obter o custo em comida
 function Ally.getFoodCost(type)
     return allyTypes[type] and allyTypes[type].costFood or math.huge
 end

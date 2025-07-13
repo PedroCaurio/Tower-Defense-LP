@@ -15,18 +15,18 @@ local structureTypes = {
     player_base = {
         -- Define os atributos para cada nível da torre do jogador
         levels = {
-            [1] = { health = 2000, spriteSheetPath = "assets/allies/tower/1.png" },
-            [2] = { health = 4000, spriteSheetPath = "assets/allies/tower/2.png" },
-            [3] = { health = 7000, spriteSheetPath = "assets/allies/tower/3.png" },
+            [1] = { health = 2000, spriteSheetPath = "assets/structures/allies/tower/1.png" },
+            [2] = { health = 4000, spriteSheetPath = "assets/structures/allies/tower/2.png" },
+            [3] = { health = 7000, spriteSheetPath = "assets/structures/allies/tower/3.png" },
         },
         grid = {w = 70, h = 130} -- Tamanho do frame do sprite da torre
     },
     enemy_base = {
         -- A ser preenchido com os dados da torre inimiga
         levels = {
-            [1] = { health = 2000, spriteSheetPath = "assets/enemies/tower/1.png" },
-            [2] = { health = 4000, spriteSheetPath = "assets/enemies/tower/2.png" },
-            [3] = { health = 7000, spriteSheetPath = "assets/enemies/tower/3.png" },
+            [1] = { health = 2000, spriteSheetPath = "assets/structures/enemies/tower/1.png" },
+            [2] = { health = 4000, spriteSheetPath = "assets/structures/enemies/tower/2.png" },
+            [3] = { health = 7000, spriteSheetPath = "assets/structures/enemies/tower/3.png" },
         },
         grid = {w = 70, h = 130}
     }
@@ -39,30 +39,39 @@ function Structure.create(type, x, y, level)
     local levelData = template.levels[level]
     assert(template and levelData, "Tipo ou nível de estrutura inválido: " .. tostring(type) .. " Lvl " .. tostring(level))
 
-    -- Carrega a spritesheet e cria o grid de animação
-    local spritesheet = love.graphics.newImage(levelData.spriteSheetPath)
-    local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
+    local spritesheet = nil
+    local structureAnimations = {}
     
-    local structureAnimations = {
-        -- Estruturas podem ter apenas um estado 'idle' (parado)
-        idle = anim8.newAnimation(grid('1-1', 1), 1):clone()
-        -- Futuramente, podemos adicionar um estado 'destroyed'
-    }
-
-    -- 4. Cria a instância usando o construtor de Unit, passando a configuração completa
+    if love.filesystem.getInfo(levelData.spriteSheetPath) then
+        spritesheet = love.graphics.newImage(levelData.spriteSheetPath)
+        print(levelData.spriteSheetPath, spritesheet:getWidth(), spritesheet:getHeight(), type)
+        local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
+        if type == "player_base" then
+            structureAnimations.idle = anim8.newAnimation(grid('1-6', 1), 0.2):clone()
+        end
+        if type == "enemy_base" then
+            structureAnimations.idle = anim8.newAnimation(grid('1-4', 1), 0.2):clone()
+        end
+    end
+    
+    -- ############ CORREÇÃO AQUI ############
+    -- Adicionamos as propriedades width, height, color e spritesheet que estavam faltando.
     local structure = Unit:new({
         x = x, y = y,
+        width = template.grid.w,
+        height = template.grid.h,
         health = levelData.health,
         maxHealth = levelData.health,
+        color = {0.7, 0.7, 0.8}, -- Uma cor padrão para o placeholder da torre
         animations = structureAnimations,
-        -- Estruturas não são viradas. A torre inimiga usará um asset já virado.
-        flipped = false 
+        flipped = (type == "enemy_base"),
+        spritesheet = spritesheet
     })
+    -- #######################################
 
-    -- Adiciona propriedades específicas da Estrutura
     structure.type = type
     structure.level = level
-    structure.state = 'idle' -- O estado padrão é 'idle'
+    structure.state = 'idle'
 
     return setmetatable(structure, Structure)
 end
@@ -94,7 +103,13 @@ function Structure:levelUp()
     -- Atualiza o visual (animação)
     local spritesheet = love.graphics.newImage(nextLevelData.spriteSheetPath)
     local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
-    self.animations.idle = anim8.newAnimation(grid('1-1', 1), 1):clone()
+    --self.animations.idle = anim8.newAnimation(grid('1-1', 1), 1):clone()
+    if type == "player_base" then
+        self.structureAnimations.idle = anim8.newAnimation(grid('1-9', 1), 0.2):clone()
+    end
+    if type == "enemy_base" then
+        self.structureAnimations.idle = anim8.newAnimation(grid('1-4', 1), 0.2):clone()
+    end
     
     print(self.type .. " evoluiu para o nível " .. self.level)
 end

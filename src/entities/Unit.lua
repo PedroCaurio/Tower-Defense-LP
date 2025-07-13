@@ -52,27 +52,31 @@ end
 function Unit:draw()
     if not self.alive then return end
 
-    -- A coordenada (self.x, self.y) agora representa o CENTRO DA BASE (os pés)
+    -- A coordenada (self.x, self.y) representa a base dos pés da entidade
     if self.animations and self.animations[self.state] and self.spritesheet then
         local anim = self.animations[self.state]
-        local spritesheet = self.spritesheet
         
-        local sx = self.flipped and -1 or 1
-        -- O offset de origem agora é no centro da base do frame
-        local ox = anim:getDimensions() / 2
-        local oy = anim:getDimensions() -- Desenha a partir dos pés para cima
+        -- ############ CORREÇÃO DEFINITIVA DA ANIMAÇÃO ############
+        -- 1. Capturamos a largura e a altura em variáveis locais distintas.
+        local w, h = anim:getDimensions()
 
+        -- 2. Calculamos os offsets corretamente a partir dessas variáveis.
+        local sx = self.flipped and -1 or 1
+        local ox = w / 2 -- Metade da largura para centralizar horizontalmente
+        local oy = h      -- A altura total para desenhar a partir dos pés
+        
         love.graphics.setColor(1, 1, 1)
-        anim:draw(spritesheet, self.x, self.y, 0, sx, 1, ox, oy)
+        anim:draw(self.spritesheet, self.x, self.y, 0, sx*2, 1*2, ox, oy)
+        -- ########################################################
     else
-        -- Desenho de fallback: um retângulo cuja base está em self.y
-        love.graphics.setColor(self.color)
+        -- Desenho de fallback
+        love.graphics.setColor(self.color or {1,1,1})
         love.graphics.rectangle("fill", self.x - self.width / 2, self.y - self.height, self.width, self.height)
     end
 
-    -- Barra de vida desenhada acima da cabeça da entidade
+    -- Barra de vida (código permanece o mesmo)
     local barWidth = 40
-    local barY = self.y - self.height - 10 -- Posição acima da cabeça
+    local barY = self.y - self.height - 10
     love.graphics.setColor(0.7, 0, 0)
     love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
     love.graphics.setColor(0, 0.8, 0)

@@ -17,10 +17,11 @@ local enemyTypes = {
         reward = 5,
         attackType = 'melee',
         attackRange = 35,
-        spriteSheetPath = "assets/enemies/invaders/soldado/spritesheet.png",
-        grid = {w = 64, h = 64},
+        spriteSheetPath = "assets/units/enemies/Spear.png",
+        grid = {w = 32, h = 32},
         animations = {
-            walk = function(g) return anim8.newAnimation(g('1-6', 1), 0.1) end,
+            --walk = anim8.newAnimation(g('1-4', 2), 0.15),
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-4', 2), 0.15) end,
             idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end
         }
@@ -30,8 +31,8 @@ local enemyTypes = {
         reward = 15,
         attackType = 'melee',
         attackRange = 35,
-        spriteSheetPath = "assets/enemies/invaders/tank/spritesheet.png", -- Caminho adicionado
-        grid = {w = 64, h = 64}, -- Grid adicionado
+        spriteSheetPath = "assets/units/enemies/Sword.png", -- Caminho adicionado
+        grid = {w = 32, h = 32}, -- Grid adicionado
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
             attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
@@ -43,8 +44,8 @@ local enemyTypes = {
         reward = 10,
         attackType = 'melee',
         attackRange = 40,
-        spriteSheetPath = "assets/enemies/invaders/ninja/spritesheet.png", -- Caminho adicionado
-        grid = {w = 64, h = 64}, -- Grid adicionado
+        spriteSheetPath = "assets/units/enemies/Horse.png", -- Caminho adicionado
+        grid = {w = 32, h = 32}, -- Grid adicionado
         animations = {
              -- Adicionando placeholders para evitar erros
             walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.1) end,
@@ -72,10 +73,9 @@ function Enemy.create(type, x, y, level, bonuses)
     local enemyAnimations = {}
     local spritesheet = nil
 
-    if love.filesystem.getInfo(template.spriteSheetPath) then
+    if template.spriteSheetPath and love.filesystem.getInfo(template.spriteSheetPath) then
         spritesheet = love.graphics.newImage(template.spriteSheetPath)
         local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
-        
         for name, creator in pairs(template.animations) do
             local ok, anim = pcall(function() return creator(grid):clone() end)
             if ok then
@@ -122,14 +122,14 @@ function Enemy:update(dt, allies, playerStructure, playState) -- Adicionamos 'pl
     local target = self:findTarget(allies, playerStructure)
 
     if target then
-        self.state = 'attacking'
+        self.state = 'attack'
     else
-        self.state = 'walking'
+        self.state = 'walk'
     end
 
-    if self.state == 'walking' then
+    if self.state == 'walk' then
         self.x = self.x - self.speed * dt
-    elseif self.state == 'attacking' then
+    elseif self.state == 'attack' then
         self.timeSinceAttack = self.timeSinceAttack + dt
         if self.timeSinceAttack >= self.attackCooldown then
             
