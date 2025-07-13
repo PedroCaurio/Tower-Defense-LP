@@ -8,7 +8,8 @@ function Button.create(x, y, width, height, text, onClick)
         width = width, height = height,
         text = text or "",
         onClick = onClick or function() end,
-        isHovered = false
+        isHovered = false,
+         enabled = true
     }
     return setmetatable(btn, Button)
 end
@@ -20,7 +21,10 @@ function Button:update(dt)
 end
 
 function Button:draw()
-    if self.isHovered then
+    -- Se o botão estiver desabilitado, desenha com uma cor mais escura e não reage ao mouse
+    if self.enabled == false then
+        love.graphics.setColor(0.1, 0.1, 0.1, 0.8)
+    elseif self.isHovered then
         love.graphics.setColor(0.5, 0.5, 0.5) -- Cinza quando hover
     else
         love.graphics.setColor(0.3, 0.3, 0.3) -- Cinza escuro normal

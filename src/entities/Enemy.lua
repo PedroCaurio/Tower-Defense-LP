@@ -114,15 +114,13 @@ function Enemy.create(type, x, y, level, bonuses)
     return setmetatable(enemy, Enemy)
 end
 
-function Enemy:update(dt, allies, playerStructure)
+function Enemy:update(dt, allies, playerStructure, playState) -- Adicionamos 'playState'
     if not self.alive then return end
 
-    -- 6. Chama o update da classe pai para cuidar da animação
     Unit.update(self, dt)
 
     local target = self:findTarget(allies, playerStructure)
 
-    -- Lógica de estado
     if target then
         self.state = 'attacking'
     else
@@ -134,7 +132,20 @@ function Enemy:update(dt, allies, playerStructure)
     elseif self.state == 'attacking' then
         self.timeSinceAttack = self.timeSinceAttack + dt
         if self.timeSinceAttack >= self.attackCooldown then
-            target:takeDamage(self.damage)
+            
+            -- Lógica de ataque para inimigos (preparada para 'ranged' no futuro)
+            if self.attackType == 'ranged' then
+                playState.projectileManager:create({
+                    x = self.x,
+                    y = self.y - self.height / 2,
+                    damage = self.damage,
+                    target = target,
+                    owner = self
+                })
+            else -- 'melee'
+                target:takeDamage(self.damage)
+            end
+
             self.timeSinceAttack = 0
         end
     end
