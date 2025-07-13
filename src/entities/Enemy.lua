@@ -1,85 +1,168 @@
 -- src/entities/Enemy.lua
 
--- 1. Importa a classe base Unit
+-- 1. Módulos necessários, incluindo a classe base e o anim8
 local Unit = require("src.entities.Unit")
+local anim8 = require("lib.anim8.anim8")
 
--- 2. Cria a classe Enemy e a faz herdar de Unit
+-- 2. Classe Enemy, herdando de Unit. A estrutura de herança está correta.
 local Enemy = {}
 setmetatable(Enemy, {__index = Unit})
 Enemy.__index = Enemy
 
--- Tabela de atributos com o valor da recompensa ('reward')
+-- 3. Configuração Central dos Inimigos (Data-Driven Design)
+-- Assim como em Ally, esta tabela se torna o cérebro dos inimigos.
 local enemyTypes = {
-    ["soldado"] = { speed = 50, health = 100, cost = 10, damage = 10, color = {0.8, 0.5, 0}, reward = 5 },
-    ["tank"]    = { speed = 30, health = 300, cost = 30, damage = 25, color = {0.5, 0.2, 0.2}, reward = 15 },
-    ["ninja"]   = { speed = 80, health = 70,  cost = 15, damage = 5,  color = {0.3, 0.3, 0.3}, reward = 10 },
+    soldado = {
+        stats = { speed = 50, health = 100, damage = 10, color = {0.8, 0.5, 0} },
+        reward = 5,
+        attackType = 'melee',
+        attackRange = 35,
+        spriteSheetPath = "assets/enemies/invaders/soldado/spritesheet.png",
+        grid = {w = 64, h = 64},
+        animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 1), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-4', 2), 0.15) end,
+            idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end
+        }
+    },
+    tank = {
+        stats = { speed = 30, health = 300, damage = 25, color = {0.5, 0.2, 0.2} },
+        reward = 15,
+        attackType = 'melee',
+        attackRange = 35,
+        spriteSheetPath = "assets/enemies/invaders/tank/spritesheet.png", -- Caminho adicionado
+        grid = {w = 64, h = 64}, -- Grid adicionado
+        animations = {
+            walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
+            attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
+            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
+        }
+    },
+    ninja = {
+        stats = { speed = 80, health = 70, damage = 5, color = {0.3, 0.3, 0.3} },
+        reward = 10,
+        attackType = 'melee',
+        attackRange = 40,
+        spriteSheetPath = "assets/enemies/invaders/ninja/spritesheet.png", -- Caminho adicionado
+        grid = {w = 64, h = 64}, -- Grid adicionado
+        animations = {
+             -- Adicionando placeholders para evitar erros
+            walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.15) end,
+            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
+        }
+    }
 }
 
--- Construtor do Enemy
-function Enemy.create(type, x, y)
-    local stats = enemyTypes[type]
-    assert(stats, "Tipo de inimigo inválido: " .. tostring(type))
+-- Construtor do Enemy, preparado para a IA que evolui
+function Enemy.create(type, x, y, level, bonuses)
+    local template = enemyTypes[type]
+    assert(template, "Tipo de inimigo inválido: " .. tostring(type))
+    
+    level = level or 1
+    bonuses = bonuses or {}
 
-    local config = {
-        x = x, y = y,
-        speed = stats.speed,
-        health = stats.health,
-        damage = stats.damage,
-        cost = stats.cost,
-        color = stats.color
+    local finalStats = {
+        speed = template.stats.speed,
+        health = (template.stats.health + (bonuses.health or 0)) * (1.15 ^ (level - 1)),
+        damage = (template.stats.damage + (bonuses.damage or 0)) * (1.15 ^ (level - 1)),
+        color = template.stats.color
     }
+    
+    local enemyAnimations = {}
+    local spritesheet = nil
 
-    local enemy = Unit:new(config)
-    setmetatable(enemy, Enemy)
+    if love.filesystem.getInfo(template.spriteSheetPath) then
+        spritesheet = love.graphics.newImage(template.spriteSheetPath)
+        local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
+        
+        for name, creator in pairs(template.animations) do
+            local ok, anim = pcall(function() return creator(grid):clone() end)
+            if ok then
+                enemyAnimations[name] = anim
+            else
+                print("AVISO: Falha ao criar animação '" .. name .. "' para a tropa '" .. type .. "'.")
+            end
+        end
+    else
+        print("AVISO: Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
+    end
+    
+    -- ############ CORREÇÃO AQUI ############
+    -- A variável foi renomeada de 'ally' para 'enemy'.
+    local enemy = Unit:new({
+        x = x, y = y,
+        speed = finalStats.speed,
+        health = finalStats.health,
+        maxHealth = finalStats.health,
+        damage = finalStats.damage,
+        cost = nil, -- Inimigos não têm custo de 'food'
+        color = finalStats.color,
+        animations = enemyAnimations,
+        flipped = true, -- Inimigos são virados para a esquerda
+        spritesheet = spritesheet
+    })
+
+    -- Adiciona propriedades específicas do Enemy
     enemy.type = type
-    
-    -- Garante que a recompensa seja armazenada na instância do inimigo
-    enemy.reward = stats.reward or 0
-    
-    return enemy
+    enemy.level = level
+    enemy.reward = template.reward
+    enemy.attackType = template.attackType
+    enemy.attackRange = template.attackRange
+    enemy.state = 'walking'
+
+    return setmetatable(enemy, Enemy)
 end
 
--- Atualiza a lógica do Enemy
-function Enemy:update(dt, allies, structure)
+function Enemy:update(dt, allies, playerStructure)
     if not self.alive then return end
 
-    self.timeSinceAttack = self.timeSinceAttack + dt
-    local attacked = false
+    -- 6. Chama o update da classe pai para cuidar da animação
+    Unit.update(self, dt)
 
-    -- Prioridade 1: Atacar aliados próximos
-    for _, ally in ipairs(allies) do
-        if ally.alive and math.abs(self.x - ally.x) < 25 then
-            if self.timeSinceAttack >= self.attackCooldown then
-                ally:takeDamage(self.damage)
-                self.timeSinceAttack = 0
-            end
-            attacked = true
-            break
-        end
+    local target = self:findTarget(allies, playerStructure)
+
+    -- Lógica de estado
+    if target then
+        self.state = 'attacking'
+    else
+        self.state = 'walking'
     end
 
-    -- Prioridade 2: Se não atacou um aliado, verifica se pode atacar a estrutura
-    if not attacked and structure and structure.alive and math.abs(self.x - structure.x) < 40 then
+    if self.state == 'walking' then
+        self.x = self.x - self.speed * dt
+    elseif self.state == 'attacking' then
+        self.timeSinceAttack = self.timeSinceAttack + dt
         if self.timeSinceAttack >= self.attackCooldown then
-            structure:takeDamage(self.damage)
+            target:takeDamage(self.damage)
             self.timeSinceAttack = 0
         end
-        attacked = true
-    end
-
-    -- Se não atacou ninguém, continua andando para a esquerda
-    if not attacked then
-        self.x = self.x - self.speed * dt
     end
 end
 
--- Função estática para obter o custo
+function Enemy:findTarget(allies, playerStructure)
+    -- Prioridade 1: Atacar aliados próximos
+    for _, ally in ipairs(allies) do
+        if ally.alive and math.abs(self.x - ally.x) < self.attackRange then
+            return ally
+        end
+    end
+
+    -- Prioridade 2: Atacar a estrutura principal
+    if playerStructure and playerStructure.alive and math.abs(self.x - playerStructure.x) < self.attackRange + 20 then
+        return playerStructure
+    end
+
+    return nil
+end
+
+-- 7. A FUNÇÃO DRAW FOI REMOVIDA
+-- Não precisamos mais dela aqui, pois a função herdada de Unit.lua já faz todo o trabalho
+-- de desenhar o sprite animado e a barra de vida. O código fica muito mais limpo!
+
+-- A função getCost é usada pela IA para decidir o que comprar, então a mantemos.
 function Enemy.getCost(type)
     return enemyTypes[type] and enemyTypes[type].cost or math.huge
 end
 
--- ######################################################################
--- A LINHA MAIS IMPORTANTE DO ARQUIVO!
--- Garante que o 'require' receba a tabela 'Enemy' e não 'true'.
--- ######################################################################
 return Enemy

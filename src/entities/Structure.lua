@@ -1,112 +1,104 @@
--- Structure.lua
-local Sprite = require("src.systems.Sprite")
-local animation = require("src.systems.animation")
+-- src/entities/Structure.lua
 
+-- 1. Módulos necessários
+local Unit = require("src.entities.Unit")
+local anim8 = require("lib.anim8.anim8")
+
+-- 2. Classe Structure, herdando de Unit.
 local Structure = {}
+setmetatable(Structure, {__index = Unit})
 Structure.__index = Structure
 
--- Tipos de estruturas pré-definidas (pode expandir depois)
-local StructureTypes = {
-    ["base"] = { width = 32, height = 128, health = 200, cost = 50, attackDamage = 0, attackRange = 0, attackSpeed = 0, color = {1, 1, 1} },
-    -- Você pode adicionar mais tipos aqui no futuro
+-- 3. Configuração Central das Estruturas (Data-Driven Design)
+-- Define os atributos para cada nível da torre, incluindo a imagem a ser usada.
+local structureTypes = {
+    player_base = {
+        -- Define os atributos para cada nível da torre do jogador
+        levels = {
+            [1] = { health = 2000, spriteSheetPath = "assets/allies/tower/1.png" },
+            [2] = { health = 4000, spriteSheetPath = "assets/allies/tower/2.png" },
+            [3] = { health = 7000, spriteSheetPath = "assets/allies/tower/3.png" },
+        },
+        grid = {w = 70, h = 130} -- Tamanho do frame do sprite da torre
+    },
+    enemy_base = {
+        -- A ser preenchido com os dados da torre inimiga
+        levels = {
+            [1] = { health = 2000, spriteSheetPath = "assets/enemies/tower/1.png" },
+            [2] = { health = 4000, spriteSheetPath = "assets/enemies/tower/2.png" },
+            [3] = { health = 7000, spriteSheetPath = "assets/enemies/tower/3.png" },
+        },
+        grid = {w = 70, h = 130}
+    }
 }
 
--- Construtor
-function Structure.create(type, x, y)
-    local stats = StructureTypes[type]
-    assert(stats, "Tipo de estrutura inválido: " .. tostring(type))
+-- Construtor da Structure
+function Structure.create(type, x, y, level)
+    level = level or 1
+    local template = structureTypes[type]
+    local levelData = template.levels[level]
+    assert(template and levelData, "Tipo ou nível de estrutura inválido: " .. tostring(type) .. " Lvl " .. tostring(level))
 
-    local structurePath = "assets/allies/tower/"
-    local structure = {
-        type = type,
-        x = x,
-        y = y,
-        width = stats.width,
-        height = stats.height,
-        health = stats.health,
-        maxHealth = stats.health,
-        cost = stats.cost,
-        alive = true,
-        attackDamage = stats.attackDamage,
-        attackRange = stats.attackRange,
-        attackSpeed = stats.attackSpeed,
-        timeSinceLastAttack = 0,
-        color = stats.color,
-        sprite = Sprite:newSprite(
-        animation:newAnimation(structurePath.."1.png", 70, 130, 1),
-        animation:newAnimation(structurePath.."2.png", 70, 130, 1),
-        animation:newAnimation(structurePath.."3.png", 70, 130, 1),
-        true
-    )
+    -- Carrega a spritesheet e cria o grid de animação
+    local spritesheet = love.graphics.newImage(levelData.spriteSheetPath)
+    local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
+    
+    local structureAnimations = {
+        -- Estruturas podem ter apenas um estado 'idle' (parado)
+        idle = anim8.newAnimation(grid('1-1', 1), 1):clone()
+        -- Futuramente, podemos adicionar um estado 'destroyed'
     }
+
+    -- 4. Cria a instância usando o construtor de Unit, passando a configuração completa
+    local structure = Unit:new({
+        x = x, y = y,
+        health = levelData.health,
+        maxHealth = levelData.health,
+        animations = structureAnimations,
+        -- Estruturas não são viradas. A torre inimiga usará um asset já virado.
+        flipped = false 
+    })
+
+    -- Adiciona propriedades específicas da Estrutura
+    structure.type = type
+    structure.level = level
+    structure.state = 'idle' -- O estado padrão é 'idle'
 
     return setmetatable(structure, Structure)
 end
 
--- Atualiza estrutura
+-- 5. Atualização simplificada
+-- A estrutura não se move, então sua lógica de update é bem simples.
 function Structure:update(dt)
-    if not self.alive then return end
+    -- Apenas precisamos chamar o update da classe pai para a animação funcionar.
+    Unit.update(self, dt)
+    -- Lógica de ataque pode ser adicionada aqui no futuro se a torre atacar.
+end
 
-    self.sprite:update(dt)
-
-    if self.attackDamage > 0 and self.attackRange > 0 then
-        self.timeSinceLastAttack = self.timeSinceLastAttack + dt
-        if self.timeSinceLastAttack >= (1 / self.attackSpeed) then
-            self:performAttack()
-            self.timeSinceLastAttack = 0
-        end
+-- 6. Novo método para evoluir a torre
+function Structure:levelUp()
+    local template = structureTypes[self.type]
+    local nextLevel = self.level + 1
+    
+    local nextLevelData = template.levels[nextLevel]
+    if not nextLevelData then
+        print("A estrutura já está no nível máximo!")
+        return
     end
 
-    if self.health <= 0 then
-        self.health = 0
-        self.alive = false
-        self:onDeath()
-    end
+    -- Atualiza o nível e os status
+    self.level = nextLevel
+    self.maxHealth = nextLevelData.health
+    self.health = self.health + (nextLevelData.health - template.levels[nextLevel - 1].health) -- Aumenta a vida
+
+    -- Atualiza o visual (animação)
+    local spritesheet = love.graphics.newImage(nextLevelData.spriteSheetPath)
+    local grid = anim8.newGrid(template.grid.w, template.grid.h, spritesheet:getWidth(), spritesheet:getHeight())
+    self.animations.idle = anim8.newAnimation(grid('1-1', 1), 1):clone()
+    
+    print(self.type .. " evoluiu para o nível " .. self.level)
 end
 
--- Desenha estrutura e vida
-function Structure:draw()
-    if not self.alive then return end
-
-    self.sprite:draw(self.x, self.y)
-
-    -- Barra de vida
-    local barWidth = 40
-    local barHeight = 5
-    local currentWidth = (self.health / self.maxHealth) * barWidth
-    love.graphics.setColor(0.2, 0.2, 0.2, 0.8)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - 5 / 2 - 10, barWidth, barHeight)
-    love.graphics.setColor(0, 1, 0)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, self.y - 5 / 2 - 10, currentWidth, barHeight)
-
-    love.graphics.setColor(1, 1, 1) -- Reset cor
-end
-
--- Recebe dano
-function Structure:takeDamage(amount)
-    if not self.alive then return end
-
-    self.health = self.health - amount
-    if self.health <= 0 then
-        self.health = 0
-        self.alive = false
-        self:onDeath()
-    end
-end
-
--- Ataque (placeholder)
-function Structure:performAttack()
-    -- Implementação futura se quiser ataque automático
-end
-
--- Ao morrer
-function Structure:onDeath()
-    print(self.type .. " at (" .. self.x .. ", " .. self.y .. ") has been destroyed!")
-end
-
--- Custo
-function Structure.getCost(type)
-    return StructureTypes[type] and StructureTypes[type].cost or math.huge
-end
+-- As funções takeDamage() e draw() foram REMOVIDAS, pois são herdadas de Unit.lua.
 
 return Structure
