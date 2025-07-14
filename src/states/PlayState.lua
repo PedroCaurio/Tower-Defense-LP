@@ -10,6 +10,10 @@ local WaveManager = require("src.systems.WaveManager")
 local ProjectileManager = require("src.systems.ProjectileManager")
 -- local AIController = require("src.systems.AIController")
 
+local floor = love.graphics.newImage("assets/background/Back_0.png")
+local floor2 = love.graphics.newImage("assets/background/Back_1.png")
+local background = love.graphics.newImage("assets/background/Background_0.png")
+
 local PlayState = {}
 PlayState.__index = PlayState
 
@@ -78,7 +82,7 @@ function PlayState:update(dt)
         return
     end
     if not self.enemyStructure.alive then
-        Gamestate.switch(require("src.states.MenuState")) -- Mudar para VictoryState
+        Gamestate.switch(require("src.states.VictoryState")) -- Mudar para VictoryState
         return
     end
 
@@ -114,6 +118,11 @@ end
 
 function PlayState:draw()
     love.graphics.clear(0.4, 0.5, 0.6)
+
+    love.graphics.draw(background, 0, 0, 0, 2, 2)
+    love.graphics.draw(background, 496, 0, 0, 2, 2)
+    love.graphics.draw(floor, 0, -8, 0, 2, 2)
+    love.graphics.draw(floor2, 496, -8, 0, 2, 2)
 
     for _, s in ipairs(self.structures) do s:draw() end
     self.projectileManager:draw()

@@ -13,7 +13,7 @@ function menu:load()
 end
 
 function menu:draw()
-    love.graphics.draw(Background, 0, 0)
+    love.graphics.draw(Background, 0, 0, 0, 3, 3)
     love.graphics.printf("MENU - Pressione Enter para Jogar", 0, 300, love.graphics.getWidth(), "center")
 end
 
