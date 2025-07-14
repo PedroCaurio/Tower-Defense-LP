@@ -12,7 +12,10 @@ function WaveManager:new()
         [1] = {
             timeBetweenWaves = 10,
             enemies = {
-                { type = "soldado", count = 5, delay = 2, interval = 0.8 }
+                { type = "soldado", count = 5, delay = 2, interval = 0.8 },
+                --{ type = "ninja", count = 6, delay = 1, interval = 0.5 },
+                --{ type = "soldado", count = 5, delay = 3, interval = 0.6 },
+                { type = "tank", count = 2, delay = 5, interval = 1.5 }
             }
         },
         [2] = {
