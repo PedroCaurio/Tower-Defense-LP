@@ -16,13 +16,13 @@ local enemyTypes = {
         stats = { speed = 50, health = 100, damage = 10, color = {0.8, 0.5, 0} },
         reward = 5,
         attackType = 'melee',
-        attackRange = 35,
+        attackRange = 40,
         spriteSheetPath = "assets/units/enemies/Spear.png",
         grid = {w = 32, h = 32},
         animations = {
             --walk = anim8.newAnimation(g('1-4', 2), 0.15),
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
-            attack = function(g) return anim8.newAnimation(g('1-4', 2), 0.15) end,
+            attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.15) end,
             idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end
         }
     },
@@ -30,12 +30,12 @@ local enemyTypes = {
         stats = { speed = 30, health = 300, damage = 25, color = {0.5, 0.2, 0.2} },
         reward = 15,
         attackType = 'melee',
-        attackRange = 35,
+        attackRange = 40,
         spriteSheetPath = "assets/units/enemies/Sword.png", -- Caminho adicionado
         grid = {w = 32, h = 32}, -- Grid adicionado
         animations = {
-            walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
-            attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.2) end,
+            attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.2) end,
             idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
         }
     },
@@ -48,8 +48,8 @@ local enemyTypes = {
         grid = {w = 32, h = 32}, -- Grid adicionado
         animations = {
              -- Adicionando placeholders para evitar erros
-            walk = function(g) return anim8.newAnimation(g('1-1', 1), 0.1) end,
-            attack = function(g) return anim8.newAnimation(g('1-1', 1), 0.15) end,
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.15) end,
             idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
         }
     }

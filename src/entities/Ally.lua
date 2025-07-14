@@ -15,15 +15,15 @@ local allyTypes = {
         stats = { speed = 50, health = 100, damage = 10, color = {0.2, 0.6, 1} },
         costFood = 10,
         attackType = 'melee',
-        attackRange = 35,
-        spriteSheetPath = "assets/units/allies/Sword.png",
+        attackRange = 40,
+        spriteSheetPath = "assets/units/allies/Spear.png",
         grid = {w = 32, h = 32},
         -- ############ TESTE DE ANIMAÇÃO SIMPLIFICADO ############
         -- Vamos usar a mesma animação de 'walk' para todos os estados.
         -- Se o soldado aparecer andando, o sistema funciona.
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
-            attack = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-7', 4), 0.1) end,
             idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
         }
         -- ########################################################
@@ -32,22 +32,38 @@ local allyTypes = {
     arqueiro = {
         stats = { speed = 40, health = 70, damage = 12, color = {0.2, 0.8, 0.2} },
         costFood = 25, attackType = 'ranged', attackRange = 250,
-        spriteSheetPath = "assets/units/allies/Archer.png", grid = {w = 32, h = 32}, animations = {}
+        spriteSheetPath = "assets/units/allies/Archer.png", grid = {w = 32, h = 32}, animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-11', 4), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+        }
     },
     tank = {
         stats = { speed = 30, health = 300, damage = 15, color = {0.8, 0.2, 0.2} },
         costFood = 30, attackType = 'melee', attackRange = 40,
-        spriteSheetPath = "assets/units/allies/Spear.png", grid = {w = 32, h = 32}, animations = {}
+        spriteSheetPath = "assets/units/allies/Sword.png", grid = {w = 32, h = 32}, animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+        }
     },
     ninja = {
         stats = { speed = 80, health = 80, damage = 20, color = {0.1, 0.1, 0.1} },
         costFood = 25, attackType = 'melee', attackRange = 40,
-        spriteSheetPath = "assets/units/allies/Mage.png", grid = {w = 32, h = 32}, animations = {}
+        spriteSheetPath = "assets/units/allies/Horse.png", grid = {w = 32, h = 32}, animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+        }
     },
     rei = {
         stats = { speed = 35, health = 800, damage = 50, color = {1, 0.8, 0} },
         costFood = 100, attackType = 'melee', attackRange = 45,
-        spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {}
+        spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+        }
     }
 }
 
