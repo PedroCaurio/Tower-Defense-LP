@@ -16,15 +16,15 @@ function Projectile:new(config)
 
     -- Carrega o asset do projétil. Usaremos um retângulo se a imagem não existir.
     proj.asset = nil
-    if love.filesystem.getInfo("assets/projectiles/arrow.png") then
-        proj.asset = love.graphics.newImage("assets/projectiles/arrow.png")
+    if love.filesystem.getInfo("assets/structures/allies/defenders/Projectiles/1.png") then
+        proj.asset = love.graphics.newImage("assets/structures/allies/defenders/Projectiles/1.png")
     end
     proj.width = proj.asset and proj.asset:getWidth() or 10
     proj.height = proj.asset and proj.asset:getHeight() or 2
 
     -- Calcula a direção para o alvo
-    local dx = proj.target.x - proj.x
-    local dy = proj.target.y - proj.y
+    local dx = proj.target.x - proj.x 
+    local dy = proj.target.y - proj.y - proj.target.height / 4
     proj.angle = math.atan2(dy, dx)
 
     -- Calcula os componentes da velocidade
@@ -45,7 +45,7 @@ function Projectile:update(dt)
 
     -- Verificação de colisão simples (baseada em distância)
     local dist = math.sqrt((self.target.x - self.x)^2 + (self.target.y - self.y)^2)
-    if dist < 20 then -- Se a distância for menor que 20 pixels, considera uma colisão
+    if dist < 50 then -- Se a distância for menor que 20 pixels, considera uma colisão
         if self.target.alive then
             self.target:takeDamage(self.damage)
         end
