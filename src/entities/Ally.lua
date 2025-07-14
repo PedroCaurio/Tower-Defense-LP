@@ -47,7 +47,7 @@ local allyTypes = {
             idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
         }
     },
-    ninja = {
+    cavaleiro = {
         stats = { speed = 80, health = 80, damage = 20, color = {0.1, 0.1, 0.1} },
         costFood = 25, attackType = 'melee', attackRange = 40,
         spriteSheetPath = "assets/units/allies/Horse.png", grid = {w = 32, h = 32}, animations = {
@@ -56,7 +56,7 @@ local allyTypes = {
             idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
         }
     },
-    rei = {
+    prince = {
         stats = { speed = 35, health = 800, damage = 50, color = {1, 0.8, 0} },
         costFood = 100, attackType = 'melee', attackRange = 45,
         spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {
@@ -168,6 +168,7 @@ end
 -- #################################################
 
 function Ally.getFoodCost(type)
+    --print(type, allyTypes[type], allyTypes[type].costFood)
     return allyTypes[type] and allyTypes[type].costFood or math.huge
 end
 

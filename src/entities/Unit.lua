@@ -18,6 +18,7 @@ function Unit:new(config)
     unit.cost = config.cost or 0
     unit.color = config.color or {1, 1, 1} -- Adicionando a cor aqui
     unit.alive = true
+    
 
     -- Status de combate
     unit.attackCooldown = 1
@@ -77,7 +78,7 @@ function Unit:draw()
     -- Barra de vida (código permanece o mesmo)
     local barWidth = 40
     local barY = self.y - self.height - 10
-    love.graphics.setColor(0.7, 0, 0)
+    love.graphics.setColor(0.2, 0.2, 0.2)
     love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
     love.graphics.setColor(0, 0.8, 0)
     local lifeWidth = (self.health / self.maxHealth) * barWidth
