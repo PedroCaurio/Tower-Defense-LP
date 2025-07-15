@@ -81,7 +81,7 @@ function Unit:draw()
         love.graphics.setColor(0.2, 0.2, 0.2)
         love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
 
-        if self.cost ~= nil and self.cost ~= 0 then
+        if self.cost ~= 0 and self.cost ~= "enemy_base" then
             love.graphics.setColor(0, 0.8, 0)
         else
             love.graphics.setColor(0.8, 0, 0)
