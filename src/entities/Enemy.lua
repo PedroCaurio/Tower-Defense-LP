@@ -55,7 +55,18 @@ local enemyTypes = {
             idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
             die = function(g) return anim8.newAnimation(g('1-6', 7), 0.2) end
         }
+    },
+    arqueiro = {
+        stats = { speed = 40, health = 70, damage = 12, color = {0.2, 0.8, 0.2} },
+        costFood = 25, attackType = 'ranged', attackRange = 250,
+        spriteSheetPath = "assets/units/enemies/Archer.png", grid = {w = 32, h = 32}, animations = {
+            walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            attack = function(g) return anim8.newAnimation(g('1-10', 4), 0.1) end,
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-4', 7), 0.15) end
+        }
     }
+    
 }
 
 -- Construtor do Enemy, preparado para a IA que evolui
@@ -112,7 +123,7 @@ function Enemy.create(type, x, y, level, bonuses)
     enemy.reward = template.reward
     enemy.attackType = template.attackType
     enemy.attackRange = template.attackRange
-    enemy.state = 'walking'
+    enemy.state = 'walk'
 
     enemy.deathTimer = 0
     enemy.timeToDie = 0.5

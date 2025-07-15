@@ -13,9 +13,11 @@ function WaveManager:new()
             timeBetweenWaves = 10,
             enemies = {
                 { type = "soldado", count = 5, delay = 2, interval = 0.8 },
-                --{ type = "ninja", count = 6, delay = 1, interval = 0.5 },
+                --{ type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
                 --{ type = "soldado", count = 5, delay = 3, interval = 0.6 },
-                { type = "tank", count = 2, delay = 5, interval = 1.5 }
+                { type = "tank", count = 2, delay = 5, interval = 1.5 },
+                { type = "cavaleiro", count = 200, delay = 2, interval = 1.5 },
+                { type = "arqueiro", count = 2, delay = 5, interval = 1.5 }
             }
         },
         [2] = {
@@ -28,7 +30,39 @@ function WaveManager:new()
         [3] = {
             timeBetweenWaves = 15,
             enemies = {
-                { type = "ninja", count = 6, delay = 1, interval = 0.5 },
+                { type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
+                { type = "soldado", count = 5, delay = 3, interval = 0.6 },
+                { type = "tank", count = 2, delay = 5, interval = 1.5 }
+            }
+        },
+        [4] = {
+            timeBetweenWaves = 15,
+            enemies = {
+                { type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
+                { type = "soldado", count = 5, delay = 3, interval = 0.6 },
+                { type = "tank", count = 2, delay = 5, interval = 1.5 }
+            }
+        },
+        [5] = {
+            timeBetweenWaves = 15,
+            enemies = {
+                { type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
+                { type = "soldado", count = 5, delay = 3, interval = 0.6 },
+                { type = "tank", count = 2, delay = 5, interval = 1.5 }
+            }
+        },
+        [6] = {
+            timeBetweenWaves = 15,
+            enemies = {
+                { type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
+                { type = "soldado", count = 5, delay = 3, interval = 0.6 },
+                { type = "tank", count = 2, delay = 5, interval = 1.5 }
+            }
+        },
+        [7] = {
+            timeBetweenWaves = 15,
+            enemies = {
+                { type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
                 { type = "soldado", count = 5, delay = 3, interval = 0.6 },
                 { type = "tank", count = 2, delay = 5, interval = 1.5 }
             }
@@ -38,12 +72,12 @@ function WaveManager:new()
     -- Estado Inicial
     manager.waveNumber = 0
     manager.state = 'BETWEEN_WAVES'
-    manager.countdown = 5
+    manager.countdown = 2
 
     manager.currentWaveGroups = {}
     manager.spawnTimers = {}
 
-    print("WaveManager inicializado. Primeira onda em 5 segundos.")
+    print("WaveManager inicializado. Primeira onda em 2 segundos.")
     return manager
 end
 
