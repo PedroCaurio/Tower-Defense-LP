@@ -9,7 +9,7 @@ Enemy.__index = Enemy
 local enemyTypes = {
     soldado = {
         stats = { speed = 50, health = 100, damage = 10, color = {0.8, 0.5, 0} },
-        reward = 5,
+        reward = 40,
         attackType = 'melee',
         attackRange = 40,
         spriteSheetPath = "assets/units/enemies/Spear.png",
@@ -22,7 +22,7 @@ local enemyTypes = {
     },
     tank = {
         stats = { speed = 30, health = 300, damage = 25, color = {0.5, 0.2, 0.2} },
-        reward = 15,
+        reward = 100,
         attackType = 'melee',
         attackRange = 40,
         spriteSheetPath = "assets/units/enemies/Sword.png", 
@@ -35,7 +35,7 @@ local enemyTypes = {
     },
     cavaleiro = {
         stats = { speed = 80, health = 70, damage = 5, color = {0.3, 0.3, 0.3} },
-        reward = 10,
+        reward = 110,
         attackType = 'melee',
         attackRange = 40,
         spriteSheetPath = "assets/units/enemies/Horse.png", 
@@ -48,8 +48,12 @@ local enemyTypes = {
     },
     arqueiro = {
         stats = { speed = 40, health = 70, damage = 12, color = {0.2, 0.8, 0.2} },
-        costFood = 25, attackType = 'ranged', attackRange = 250,
-        spriteSheetPath = "assets/units/enemies/Archer.png", grid = {w = 32, h = 32}, animations = {
+        reward = 100, 
+        attackType = 'ranged', 
+        attackRange = 250,
+        spriteSheetPath = "assets/units/enemies/Archer.png", 
+        grid = {w = 32, h = 32}, 
+        animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-10', 4), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-4', 7), 0.15) end

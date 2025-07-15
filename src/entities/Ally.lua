@@ -50,8 +50,8 @@ local allyTypes = {
         }
     },
     principe = {
-        stats = { speed = 35, health = 800, damage = 50, color = {1, 0.8, 0} },
-        costFood = 100, attackType = 'melee', attackRange = 45,
+        stats = { speed = 35, health = 500, damage = 50, color = {1, 0.8, 0} },
+        costFood = 200, attackType = 'melee', attackRange = 45,
         spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,

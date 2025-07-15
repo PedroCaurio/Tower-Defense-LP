@@ -326,7 +326,7 @@ function PlayState:initializeUpgrades()
         -- === Categoria: Sustentabilidade ===
         upgradeFoodGen = {
             name = "Melhorar Ger. de Comida",
-            getCost = function(state) return 150 * (1.8 ^ (state.player.foodPerSecond - 2)) end,
+            getCost = function(state) return 150 * (1.1 ^ (state.player.foodPerSecond - 2)) end,
             isVisible = function() return true end,
             canPurchase = function() return true end,
             apply = function(state) state.player.foodPerSecond = state.player.foodPerSecond + 1 end,
@@ -334,7 +334,7 @@ function PlayState:initializeUpgrades()
         },
         upgradeGoldPerKill = {
             name = "Aumentar Ouro por Abate",
-            getCost = function(state) return 400 * (2 ^ ( (state.player.goldPerKillMultiplier - 1) / 0.25) ) end,
+            getCost = function(state) return 400 * (1.2 ^ ( (state.player.goldPerKillMultiplier - 1) / 0.25) ) end,
             isVisible = function() return true end,
             canPurchase = function() return true end,
             apply = function(state) state.player.goldPerKillMultiplier = state.player.goldPerKillMultiplier + 0.25 end,
