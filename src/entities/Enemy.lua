@@ -1,16 +1,11 @@
--- src/entities/Enemy.lua
-
--- 1. Módulos necessários, incluindo a classe base e o anim8
+-- Arquivo da classe inimigo
 local Unit = require("src.entities.Unit")
 local anim8 = require("lib.anim8.anim8")
 
--- 2. Classe Enemy, herdando de Unit. A estrutura de herança está correta.
 local Enemy = {}
-setmetatable(Enemy, {__index = Unit})
+setmetatable(Enemy, {__index = Unit}) -- Herança
 Enemy.__index = Enemy
 
--- 3. Configuração Central dos Inimigos (Data-Driven Design)
--- Assim como em Ally, esta tabela se torna o cérebro dos inimigos.
 local enemyTypes = {
     soldado = {
         stats = { speed = 50, health = 100, damage = 10, color = {0.8, 0.5, 0} },
@@ -20,10 +15,8 @@ local enemyTypes = {
         spriteSheetPath = "assets/units/enemies/Spear.png",
         grid = {w = 32, h = 32},
         animations = {
-            --walk = anim8.newAnimation(g('1-4', 2), 0.15),
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.15) end,
-            idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end,
             die = function(g) return anim8.newAnimation(g('1-5', 6), 0.2) end
         }
     },
@@ -32,12 +25,11 @@ local enemyTypes = {
         reward = 15,
         attackType = 'melee',
         attackRange = 40,
-        spriteSheetPath = "assets/units/enemies/Sword.png", -- Caminho adicionado
-        grid = {w = 32, h = 32}, -- Grid adicionado
+        spriteSheetPath = "assets/units/enemies/Sword.png", 
+        grid = {w = 32, h = 32}, 
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.2) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.2) end,
-            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
             die = function(g) return anim8.newAnimation(g('1-4', 7), 0.25) end
         }
     },
@@ -46,13 +38,11 @@ local enemyTypes = {
         reward = 10,
         attackType = 'melee',
         attackRange = 40,
-        spriteSheetPath = "assets/units/enemies/Horse.png", -- Caminho adicionado
-        grid = {w = 32, h = 32}, -- Grid adicionado
+        spriteSheetPath = "assets/units/enemies/Horse.png", 
+        grid = {w = 32, h = 32}, 
         animations = {
-             -- Adicionando placeholders para evitar erros
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.15) end,
-            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
             die = function(g) return anim8.newAnimation(g('1-6', 7), 0.2) end
         }
     },
@@ -62,14 +52,13 @@ local enemyTypes = {
         spriteSheetPath = "assets/units/enemies/Archer.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-10', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-4', 7), 0.15) end
         }
     }
     
 }
 
--- Construtor do Enemy, preparado para a IA que evolui
+-- Construtor do Enemy
 function Enemy.create(type, x, y, level, bonuses)
     local template = enemyTypes[type]
     assert(template, "Tipo de inimigo inválido: " .. tostring(type))
@@ -95,15 +84,14 @@ function Enemy.create(type, x, y, level, bonuses)
             if ok then
                 enemyAnimations[name] = anim
             else
-                print("AVISO: Falha ao criar animação '" .. name .. "' para a tropa '" .. type .. "'.")
+                print("Falha ao criar animação '" .. name .. "' para a tropa '" .. type .. "'.")
             end
         end
     else
-        print("AVISO: Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
+        print("Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
     end
     
-    -- ############ CORREÇÃO AQUI ############
-    -- A variável foi renomeada de 'ally' para 'enemy'.
+    
     local enemy = Unit:new({
         x = x, y = y,
         speed = finalStats.speed,
@@ -113,11 +101,10 @@ function Enemy.create(type, x, y, level, bonuses)
         cost = nil, -- Inimigos não têm custo de 'food'
         color = finalStats.color,
         animations = enemyAnimations,
-        flipped = true, -- Inimigos são virados para a esquerda
+        flipped = true, 
         spritesheet = spritesheet
     })
 
-    -- Adiciona propriedades específicas do Enemy
     enemy.type = type
     enemy.level = level
     enemy.reward = template.reward
@@ -130,7 +117,7 @@ function Enemy.create(type, x, y, level, bonuses)
     return setmetatable(enemy, Enemy)
 end
 
-function Enemy:update(dt, allies, playerStructure, playState) -- Adicionamos 'playState'
+function Enemy:update(dt, allies, playerStructure, playState) 
     if not self.alive then
         self.state = 'die'
         Unit.update(self, dt)
@@ -187,11 +174,7 @@ function Enemy:findTarget(allies, playerStructure)
     return nil
 end
 
--- 7. A FUNÇÃO DRAW FOI REMOVIDA
--- Não precisamos mais dela aqui, pois a função herdada de Unit.lua já faz todo o trabalho
--- de desenhar o sprite animado e a barra de vida. O código fica muito mais limpo!
-
--- A função getCost é usada pela IA para decidir o que comprar, então a mantemos.
+-- Eu acho que isso aqui tá inutil guys
 function Enemy.getCost(type)
     return enemyTypes[type] and enemyTypes[type].cost or math.huge
 end

@@ -1,15 +1,13 @@
--- src/entities/Ally.lua
+-- Arquivo herdado de unit para representar os aliados
 
--- 1. Módulos necessários
 local Unit = require("src.entities.Unit")
 local anim8 = require("lib.anim8.anim8")
 
--- 2. Classe Ally, herdando de Unit.
 local Ally = {}
 setmetatable(Ally, {__index = Unit})
 Ally.__index = Ally
 
--- 3. Configuração Central de Tropas (Data-Driven Design)
+-- Tipos de aliados, temos que balancear aquiii
 local allyTypes = {
     soldado = {
         stats = { speed = 50, health = 100, damage = 10, color = {0.2, 0.6, 1} },
@@ -18,25 +16,18 @@ local allyTypes = {
         attackRange = 40,
         spriteSheetPath = "assets/units/allies/Spear.png",
         grid = {w = 32, h = 32},
-        -- ############ TESTE DE ANIMAÇÃO SIMPLIFICADO ############
-        -- Vamos usar a mesma animação de 'walk' para todos os estados.
-        -- Se o soldado aparecer andando, o sistema funciona.
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-5', 6), 0.1) end
         }
-        -- ########################################################
     },
-    -- O resto da tabela permanece igual para manter o foco no soldado
     arqueiro = {
         stats = { speed = 40, health = 70, damage = 12, color = {0.2, 0.8, 0.2} },
         costFood = 25, attackType = 'ranged', attackRange = 250,
         spriteSheetPath = "assets/units/allies/Archer.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-11', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-4', 7), 0.15) end
         }
     },
@@ -46,7 +37,6 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Sword.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-4', 6), 0.1) end
         }
     },
@@ -56,7 +46,6 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Horse.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-6', 7), 0.1) end
         }
     },
@@ -66,13 +55,11 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             die = function(g) return anim8.newAnimation(g('1-6', 6), 0.1) end
         }
     }
 }
-
--- O construtor permanece o mesmo, pois nossa arquitetura já é robusta
+-- Construtor
 function Ally.create(type, x, y, level, bonuses)
     local template = allyTypes[type]
     assert(template, "Tipo de aliado inválido: " .. tostring(type))
@@ -98,11 +85,11 @@ function Ally.create(type, x, y, level, bonuses)
             if ok then
                 allyAnimations[name] = anim
             else
-                print("AVISO: Falha ao criar animação '" .. name .. "' para a tropa '" .. type .. "'. Verifique os frames no spritesheet.")
+                print("Falha ao criar animação '" .. name .. "' para a tropa '" .. type .. "'")
             end
         end
     else
-        print("AVISO: Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
+        print("Asset não encontrado para a tropa '" .. type .. "'. Usando placeholder.")
     end
 
     local ally = Unit:new({
@@ -119,14 +106,13 @@ function Ally.create(type, x, y, level, bonuses)
         spritesheet = spritesheet
     })
     
-    ally.type, ally.level, ally.attackType, ally.attackRange, ally.state = type, level, template.attackType, template.attackRange, 'walking'
+    ally.type, ally.level, ally.attackType, ally.attackRange, ally.state = type, level, template.attackType, template.attackRange, 'walk'
     
     ally.deathTimer = 0
     ally.timeToDie = 0.5
     return setmetatable(ally, Ally)
 end
 
--- A função update permanece a mesma, pois já estava correta
 function Ally:update(dt, enemies, enemyStructure, playState)
     if not self.alive then
         self.state = 'die'
@@ -160,23 +146,19 @@ function Ally:update(dt, enemies, enemyStructure, playState)
     end
 end
 
--- ############ LÓGICA DE ALVO CORRIGIDA ############
 function Ally:findTarget(enemies, enemyStructure)
-    -- Prioridade 1: Atacar inimigos próximos
     for _, enemy in ipairs(enemies) do
         if enemy.alive and math.abs(self.x - enemy.x) < self.attackRange then
             return enemy
         end
     end
 
-    -- Prioridade 2: Se não houver inimigos, atacar a torre inimiga se estiver no alcance
     if enemyStructure and enemyStructure.alive and math.abs(self.x - enemyStructure.x) < self.attackRange then
         return enemyStructure
     end
 
     return nil
 end
--- #################################################
 
 function Ally.getFoodCost(type)
     --print(type, allyTypes[type], allyTypes[type].costFood)

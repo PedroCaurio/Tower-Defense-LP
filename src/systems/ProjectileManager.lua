@@ -1,4 +1,4 @@
--- src/systems/ProjectileManager.lua
+-- Arquivo para gerenciar os projeteis
 
 local Projectile = require("src.entities.Projectile")
 
@@ -10,7 +10,7 @@ function ProjectileManager:new()
     setmetatable(manager, self)
 
     manager.projectiles = {}
-    print("ProjectileManager inicializado.")
+    --print("ProjectileManager inicializado.")
     return manager
 end
 
