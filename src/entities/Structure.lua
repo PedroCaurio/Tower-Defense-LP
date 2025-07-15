@@ -1,5 +1,4 @@
--- src/entities/Structure.lua
-
+-- Arquivo para gerenciar as estruturas, é filho de Unit
 local Unit = require("src.entities.Unit")
 local anim8 = require("lib.anim8.anim8")
 
@@ -7,7 +6,7 @@ local Structure = {}
 setmetatable(Structure, {__index = Unit})
 Structure.__index = Structure
 
--- Dados de configuração (data-driven)
+-- Tipos de construções, acho que as vidas estão ok
 local structureTypes = {
     player_base = {
         levels = {
@@ -27,7 +26,7 @@ local structureTypes = {
     }
 }
 
--- Cria uma nova estrutura
+-- Construtor
 function Structure.create(type, x, y, level)
     level = level or 1
     local template = structureTypes[type]
@@ -81,7 +80,7 @@ function Structure:levelUp()
     local nextLevelData = template.levels[nextLevel]
 
     if not nextLevelData then
-        print("A estrutura já está no nível máximo!")
+        --print("A estrutura já está no nível máximo")
         return
     end
 

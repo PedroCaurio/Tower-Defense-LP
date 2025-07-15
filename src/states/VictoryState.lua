@@ -1,3 +1,5 @@
+-- Arquivo de estado para mostrar a tela de vitoria
+
 local Gamestate = require "lib.hump.gamestate"
 local image = love.graphics.newImage("assets/menus/winImage.png")
 

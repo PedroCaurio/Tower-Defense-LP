@@ -1,4 +1,5 @@
--- src/states/PlayState.lua
+-- Arquivo principal do jogo, contém toda a lógica (Desculpa se ele ficar meio confuso kkkk)
+
 local Gamestate = require "lib.hump.gamestate"
 
 local Ally = require("src.entities.Ally")
@@ -8,7 +9,6 @@ local Button = require("src.ui.Button")
 
 local WaveManager = require("src.systems.WaveManager")
 local ProjectileManager = require("src.systems.ProjectileManager")
--- local AIController = require("src.systems.AIController")
 
 local floor = love.graphics.newImage("assets/background/Back_0.png")
 local floor2 = love.graphics.newImage("assets/background/Back_1.png")
@@ -41,9 +41,9 @@ function PlayState:load()
     setmetatable(state, PlayState)
 
     state.player = {
-        gold = 999999999999000, -- Ouro inicial para testes
+        gold = 999999999999000, -- <<<<<    Ouro inicial
         food = 100,
-        foodMax = 200,
+        foodMax = 500,
         foodPerSecond = 2,
         goldPerKillMultiplier = 1,
         towerLevel = 1,
@@ -148,7 +148,6 @@ function PlayState:draw()
     end
 end
 
--- As funções mousepressed e keypressed permanecem as mesmas
 function PlayState:mousepressed(x, y, button)
     if button ~= 1 then return end
     if self.isUpgradePanelOpen then
@@ -256,12 +255,11 @@ end
 --------------------------------------------------------------------------------
 
 function PlayState:initializeUpgrades()
-    -- Função auxiliar para criar upgrades de NÍVEL de tropas
     local function createTroopLevelUpgrade(troopName, displayName)
         local key = "upgrade" .. displayName:gsub(" ", "")
         return {
             name = "Melhorar " .. displayName,
-            getCost = function(state) return 50 * (state.player.troopLevels[troopName] ^ 1.6) end,
+            getCost = function(state) return 50 * (state.player.troopLevels[troopName] ^ 1.4) end, -- <<< Balancear aqui o custo
             isVisible = function(state) return state.player.unlockedTroops[troopName] end,
             canPurchase = function(state)
                 local maxLevel = gameSettings.troopMaxLevelByTowerLevel[state.player.towerLevel]
@@ -276,7 +274,6 @@ function PlayState:initializeUpgrades()
         }
     end
 
-    -- Função auxiliar para criar upgrades de DESBLOQUEIO de tropas
     local function createTroopUnlock(troopName, displayName, cost, requiredTowerLevel)
         return {
             name = "Desbloquear " .. displayName,
@@ -329,7 +326,7 @@ function PlayState:initializeUpgrades()
         -- === Categoria: Sustentabilidade ===
         upgradeFoodGen = {
             name = "Melhorar Ger. de Comida",
-            getCost = function(state) return 150 * (1.8 ^ (state.player.foodPerSecond - 2)) end,
+            getCost = function(state) return 150 * (1.1 ^ (state.player.foodPerSecond - 2)) end,
             isVisible = function() return true end,
             canPurchase = function() return true end,
             apply = function(state) state.player.foodPerSecond = state.player.foodPerSecond + 1 end,
@@ -337,7 +334,7 @@ function PlayState:initializeUpgrades()
         },
         upgradeGoldPerKill = {
             name = "Aumentar Ouro por Abate",
-            getCost = function(state) return 400 * (2 ^ ( (state.player.goldPerKillMultiplier - 1) / 0.25) ) end,
+            getCost = function(state) return 400 * (1.2 ^ ( (state.player.goldPerKillMultiplier - 1) / 0.25) ) end,
             isVisible = function() return true end,
             canPurchase = function() return true end,
             apply = function(state) state.player.goldPerKillMultiplier = state.player.goldPerKillMultiplier + 0.25 end,
@@ -353,7 +350,6 @@ function PlayState:initializeUpgrades()
         }
     }
 
-    -- Adiciona uma função genérica a cada upgrade para criar seu botão
     for key, upgrade in pairs(self.upgrades) do
         upgrade.getButton = function(state, x, y, w, h)
             local canBuy, reason = upgrade.canPurchase(state)

@@ -1,3 +1,5 @@
+-- Arquivo de estado para mostrar a tela de menu principal
+
 local Gamestate = require "lib.hump.gamestate"
 local menu = {}
 menu.__index = menu

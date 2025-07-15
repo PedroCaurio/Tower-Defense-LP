@@ -1,4 +1,4 @@
--- src/systems/WaveManager.lua
+-- Arquivo que gerencia as waves de inimigos
 
 local WaveManager = {}
 WaveManager.__index = WaveManager
@@ -16,7 +16,7 @@ function WaveManager:new()
                 --{ type = "cavaleiro", count = 6, delay = 1, interval = 0.5 },
                 --{ type = "soldado", count = 5, delay = 3, interval = 0.6 },
                 { type = "tank", count = 2, delay = 5, interval = 1.5 },
-                { type = "cavaleiro", count = 200, delay = 2, interval = 1.5 },
+                --{ type = "cavaleiro", count = 200, delay = 2, interval = 1.5 },
                 { type = "arqueiro", count = 2, delay = 5, interval = 1.5 }
             }
         },
@@ -77,7 +77,7 @@ function WaveManager:new()
     manager.currentWaveGroups = {}
     manager.spawnTimers = {}
 
-    print("WaveManager inicializado. Primeira onda em 2 segundos.")
+    --print("WaveManager inicializado. Primeira onda em 2 segundos.")
     return manager
 end
 
@@ -87,17 +87,17 @@ function WaveManager:startNextWave(playState)
     local currentWaveData = self.waveData[self.waveNumber]
 
     if not currentWaveData then
-        print("Todas as ondas foram derrotadas!")
+        --print("Todas as ondas foram derrotadas!")
         currentWaveData = self.waveData[#self.waveData] -- Repete a última onda
     end
     
      if (self.waveNumber > 1) and (playState.enemyStructure.level < 3) then
         playState.ai.towerLevel = playState.ai.towerLevel + 1
         playState.enemyStructure:levelUp()
-        print("Torre inimiga evoluiu para o nível " .. playState.enemyStructure.level)
+        --print("Torre inimiga evoluiu para o nível " .. playState.enemyStructure.level)
     end
 
-    print("Iniciando Wave " .. self.waveNumber)
+    --print("Iniciando Wave " .. self.waveNumber)
     self.state = 'SPAWNING'
     self.currentWaveGroups = {}
     self.spawnTimers = {}
@@ -108,12 +108,7 @@ function WaveManager:startNextWave(playState)
             count = groupData.count,
             remaining = groupData.count,
             interval = groupData.interval,
-            -- ############ CORREÇÃO AQUI ############
-            -- Inicializamos o timer de intervalo para 0.
-            -- Isso garante que o primeiro inimigo do grupo seja criado
-            -- assim que o 'delay' inicial terminar.
             intervalTimer = 0
-            -- ##########################################
         }
         self.currentWaveGroups[i] = group
         self.spawnTimers[i] = groupData.delay
@@ -148,12 +143,12 @@ function WaveManager:update(dt, playState)
 
         if groupsFinished then
             self.state = 'WAVE_IN_PROGRESS'
-            print("Onda " .. self.waveNumber .. " em progresso. Derrote todos os inimigos!")
+            --print("Onda " .. self.waveNumber .. " em progresso.")
         end
 
     elseif self.state == 'WAVE_IN_PROGRESS' then
         if #playState.enemies == 0 then
-            print("Onda " .. self.waveNumber .. " derrotada!")
+            print("Onda " .. self.waveNumber .. " derrotada")
             local waveData = self.waveData[self.waveNumber] or self.waveData[#self.waveData]
             self.countdown = waveData.timeBetweenWaves
             self.state = 'BETWEEN_WAVES'
