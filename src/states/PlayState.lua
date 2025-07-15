@@ -97,15 +97,23 @@ function PlayState:update(dt)
         for i = #self.allies, 1, -1 do
             local ally = self.allies[i]
             ally:update(dt, self.enemies, self.enemyStructure, self)
-            if not ally.alive then table.remove(self.allies, i) end
+            if not ally.alive then
+                ally.deathTimer = ally.deathTimer + dt
+                if ally.deathTimer >= ally.timeToDie then
+                    table.remove(self.allies, i)
+                end
+            end
         end
 
         for i = #self.enemies, 1, -1 do
             local enemy = self.enemies[i]
             enemy:update(dt, self.allies, self.playerStructure, self)
             if not enemy.alive then
+                enemy.deathTimer = enemy.deathTimer + dt
+                if enemy.deathTimer >= enemy.timeToDie then
+                    table.remove(self.enemies, i)
+                end
                 self.player.gold = self.player.gold + (enemy.reward or 0) * self.player.goldPerKillMultiplier
-                table.remove(self.enemies, i)
             end
         end
     end

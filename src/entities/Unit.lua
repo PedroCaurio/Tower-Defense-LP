@@ -43,17 +43,18 @@ function Unit:takeDamage(dmg)
 end
 
 function Unit:update(dt)
-    if not self.alive then return end
+    local anim = self.animations[self.state]
     
-    if self.animations[self.state] then
-        self.animations[self.state]:update(dt)
+    -- Se estiver morto, só atualiza a animação de morte
+    if not self.alive and self.state ~= "die" then return end
+    
+    if anim then
+        anim:update(dt)
     end
 end
 
-function Unit:draw()
-    if not self.alive then return end
 
-    -- A coordenada (self.x, self.y) representa a base dos pés da entidade
+function Unit:draw()    -- A coordenada (self.x, self.y) representa a base dos pés da entidade
     if self.animations and self.animations[self.state] and self.spritesheet then
         local anim = self.animations[self.state]
         

@@ -24,7 +24,8 @@ local allyTypes = {
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-5', 6), 0.1) end
         }
         -- ########################################################
     },
@@ -35,7 +36,8 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Archer.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-11', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-4', 7), 0.1) end
         }
     },
     tank = {
@@ -44,7 +46,8 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Sword.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-4', 6), 0.1) end
         }
     },
     cavaleiro = {
@@ -53,7 +56,8 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Horse.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-6', 7), 0.1) end
         }
     },
     principe = {
@@ -62,7 +66,8 @@ local allyTypes = {
         spriteSheetPath = "assets/units/allies/Prince.png", grid = {w = 32, h = 32}, animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.1) end,
-            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end
+            idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
+            die = function(g) return anim8.newAnimation(g('1-6', 6), 0.1) end
         }
     }
 }
@@ -116,12 +121,18 @@ function Ally.create(type, x, y, level, bonuses)
     
     ally.type, ally.level, ally.attackType, ally.attackRange, ally.state = type, level, template.attackType, template.attackRange, 'walking'
     
+    ally.deathTimer = 0
+    ally.timeToDie = 0.5
     return setmetatable(ally, Ally)
 end
 
 -- A função update permanece a mesma, pois já estava correta
 function Ally:update(dt, enemies, enemyStructure, playState)
-    if not self.alive then return end
+    if not self.alive then
+        self.state = 'die'
+        Unit.update(self, dt)
+        return
+    end
     Unit.update(self, dt)
     
     local target = self:findTarget(enemies, enemyStructure)

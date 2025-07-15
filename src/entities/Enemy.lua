@@ -23,7 +23,8 @@ local enemyTypes = {
             --walk = anim8.newAnimation(g('1-4', 2), 0.15),
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.15) end,
-            idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end
+            idle = function(g) return anim8.newAnimation(g('1-4', 3), 0.2) end,
+            die = function(g) return anim8.newAnimation(g('1-5', 6), 0.2) end
         }
     },
     tank = {
@@ -36,10 +37,11 @@ local enemyTypes = {
         animations = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.2) end,
             attack = function(g) return anim8.newAnimation(g('1-6', 4), 0.2) end,
-            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
+            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
+            die = function(g) return anim8.newAnimation(g('1-4', 7), 0.25) end
         }
     },
-    ninja = {
+    cavaleiro = {
         stats = { speed = 80, health = 70, damage = 5, color = {0.3, 0.3, 0.3} },
         reward = 10,
         attackType = 'melee',
@@ -50,7 +52,8 @@ local enemyTypes = {
              -- Adicionando placeholders para evitar erros
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-7', 5), 0.15) end,
-            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end
+            idle = function(g) return anim8.newAnimation(g('1-1', 1), 0.2) end,
+            die = function(g) return anim8.newAnimation(g('1-6', 7), 0.2) end
         }
     }
 }
@@ -111,11 +114,17 @@ function Enemy.create(type, x, y, level, bonuses)
     enemy.attackRange = template.attackRange
     enemy.state = 'walking'
 
+    enemy.deathTimer = 0
+    enemy.timeToDie = 0.5
     return setmetatable(enemy, Enemy)
 end
 
 function Enemy:update(dt, allies, playerStructure, playState) -- Adicionamos 'playState'
-    if not self.alive then return end
+    if not self.alive then
+        self.state = 'die'
+        Unit.update(self, dt)
+        return
+    end
 
     Unit.update(self, dt)
 
