@@ -77,12 +77,18 @@ function Unit:draw()
 
     -- Barra de vida (código permanece o mesmo)
     local barWidth = 40
-    local barY = self.y - self.height - 10
-    love.graphics.setColor(0.2, 0.2, 0.2)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
-    love.graphics.setColor(0, 0.8, 0)
-    local lifeWidth = (self.health / self.maxHealth) * barWidth
-    love.graphics.rectangle("fill", self.x - barWidth / 2, barY, lifeWidth, 5)
+        local barY = self.y - self.height - 10
+        love.graphics.setColor(0.2, 0.2, 0.2)
+        love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
+
+        if self.cost ~= nil and self.cost ~= 0 then
+            love.graphics.setColor(0, 0.8, 0)
+        else
+            love.graphics.setColor(0.8, 0, 0)
+        end
+
+        local lifeWidth = (self.health / self.maxHealth) * barWidth
+        love.graphics.rectangle("fill", self.x - barWidth / 2, barY, lifeWidth, 5)
 
     love.graphics.setColor(1, 1, 1)
 end

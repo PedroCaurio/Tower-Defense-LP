@@ -48,7 +48,7 @@ function WaveManager:new()
 end
 
 -- Inicia a próxima onda
-function WaveManager:startNextWave()
+function WaveManager:startNextWave(playState)
     self.waveNumber = self.waveNumber + 1
     local currentWaveData = self.waveData[self.waveNumber]
 
@@ -57,6 +57,12 @@ function WaveManager:startNextWave()
         currentWaveData = self.waveData[#self.waveData] -- Repete a última onda
     end
     
+     if (self.waveNumber > 1) and (playState.enemyStructure.level < 3) then
+        playState.ai.towerLevel = playState.ai.towerLevel + 1
+        playState.enemyStructure:levelUp()
+        print("Torre inimiga evoluiu para o nível " .. playState.enemyStructure.level)
+    end
+
     print("Iniciando Wave " .. self.waveNumber)
     self.state = 'SPAWNING'
     self.currentWaveGroups = {}
@@ -85,7 +91,7 @@ function WaveManager:update(dt, playState)
     if self.state == 'BETWEEN_WAVES' then
         self.countdown = self.countdown - dt
         if self.countdown <= 0 then
-            self:startNextWave()
+            self:startNextWave(playState)
         end
 
     elseif self.state == 'SPAWNING' then

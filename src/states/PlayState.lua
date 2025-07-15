@@ -28,7 +28,7 @@ local gameSettings = {
     troopsToUnlock = {
         [1] = { { key = "unlockTank", troop = "tank" } },
         [2] = { { key = "unlockArqueiro", troop = "arqueiro" } },
-        [3] = { { key = "unlockCavaleiro", troop = "cavaleiro" }, { key = "unlockPrince", troop = "prince" } }
+        [3] = { { key = "unlockCavaleiro", troop = "cavaleiro" }, { key = "unlockPrincipe", troop = "principe" } }
     }
 }
 
@@ -47,13 +47,13 @@ function PlayState:load()
         foodPerSecond = 2,
         goldPerKillMultiplier = 1,
         towerLevel = 1,
-        unlockedTroops = { soldado = true, tank = false, arqueiro = false, cavaleiro = false, prince = false },
-        troopLevels = { soldado = 1, tank = 1, arqueiro = 1, cavaleiro = 1, prince = 1 }
+        unlockedTroops = { soldado = true, tank = false, arqueiro = false, cavaleiro = false, principe = false },
+        troopLevels = { soldado = 1, tank = 1, arqueiro = 1, cavaleiro = 1, principe = 1 }
     }
     state.ai = {
         towerLevel = 1,
-        unlockedTroops = { soldado = true, tank = true, cavaleiro = true, arqueiro = true, prince = true },
-        troopLevels = { soldado = 1, tank = 1, arqueiro = 1, cavaleiro = 1, prince = 1 },
+        unlockedTroops = { soldado = true, tank = true, cavaleiro = true, arqueiro = true, principe = true },
+        troopLevels = { soldado = 1, tank = 1, arqueiro = 1, cavaleiro = 1, principe = 1 },
         gold = 200,
     }
 
@@ -91,8 +91,6 @@ function PlayState:update(dt)
         
         self.waveManager:update(dt, self)
         self.projectileManager:update(dt)
-        
-        
 
         for _, s in ipairs(self.structures) do s:update(dt) end
 
@@ -180,7 +178,7 @@ end
 function PlayState:rebuildSpawnUI()
     self.uiSpawnElements = {}
     local yPos = 100
-    local troopOrder = {"soldado", "tank", "arqueiro", "cavaleiro", "prince"}
+    local troopOrder = {"soldado", "tank", "arqueiro", "cavaleiro", "principe"}
     for _, troopName in ipairs(troopOrder) do
         if self.player.unlockedTroops[troopName] then
             local cost = Ally.getFoodCost(troopName)
@@ -226,8 +224,8 @@ function PlayState:drawUpgradePanel()
     local yPos = { 120, 120, 120 }
 
     local upgradeLayout = {
-        [1] = {"upgradeTower", "unlockTank", "unlockArqueiro", "unlockCavaleiro", "unlockPrince"}, -- Coluna 1: Torre e Desbloqueios
-        [2] = {"upgradeSoldado", "upgradeTank", "upgradeArqueiro", "upgradeCavaleiro", "upgradePrince"}, -- Coluna 2: Níveis de Tropas
+        [1] = {"upgradeTower", "unlockTank", "unlockArqueiro", "unlockCavaleiro", "unlockPrincipe"}, -- Coluna 1: Torre e Desbloqueios
+        [2] = {"upgradeSoldado", "upgradeTank", "upgradeArqueiro", "upgradeCavaleiro", "upgradePrincipe"}, -- Coluna 2: Níveis de Tropas
         [3] = {"upgradeFoodGen", "buyFood", "upgradeGoldPerKill"} -- Coluna 3: Sustentabilidade
     }
 
@@ -311,14 +309,14 @@ function PlayState:initializeUpgrades()
         unlockTank = createTroopUnlock("tank", "Tank", 250, 1),
         unlockArqueiro = createTroopUnlock("arqueiro", "Arqueiro", 400, 2),
         unlockCavaleiro = createTroopUnlock("cavaleiro", "Cavaleiro", 600, 3),
-        unlockPrince = createTroopUnlock("prince", "Prince", 1500, 3),
+        unlockPrincipe = createTroopUnlock("principe", "Principe", 1500, 3),
 
         -- === Categoria: Tropas (Melhoria de Nível) ===
         upgradeSoldado = createTroopLevelUpgrade("soldado", "Soldado"),
         upgradeTank = createTroopLevelUpgrade("tank", "Tank"),
         upgradeArqueiro = createTroopLevelUpgrade("arqueiro", "Arqueiro"),
         upgradeCavaleiro = createTroopLevelUpgrade("cavaleiro", "Cavaleiro"),
-        upgradePrince = createTroopLevelUpgrade("prince", "Prince"),
+        upgradePrincipe = createTroopLevelUpgrade("principe", "Principe"),
 
         -- === Categoria: Sustentabilidade ===
         upgradeFoodGen = {
