@@ -1,14 +1,17 @@
--- src/ui/Button.lua
+-- Arquivo para criação de botões genéricos
+
 local Button = {}
 Button.__index = Button
 
-function Button.create(x, y, width, height, text, onClick)
+-- Construtor
+function Button.create(x, y, width, height, text, onClick) -- O parâmetro onClick deve ser uma função que é chamada quando o botão é clicado
     local btn = {
         x = x, y = y,
         width = width, height = height,
         text = text or "",
         onClick = onClick or function() end,
-        isHovered = false
+        isHovered = false,
+         enabled = true
     }
     return setmetatable(btn, Button)
 end
@@ -20,7 +23,10 @@ function Button:update(dt)
 end
 
 function Button:draw()
-    if self.isHovered then
+    -- Se o botão estiver desabilitado, desenha com uma cor mais escura e não reage ao mouse
+    if self.enabled == false then
+        love.graphics.setColor(0.1, 0.1, 0.1, 0.8)
+    elseif self.isHovered then
         love.graphics.setColor(0.5, 0.5, 0.5) -- Cinza quando hover
     else
         love.graphics.setColor(0.3, 0.3, 0.3) -- Cinza escuro normal
@@ -31,6 +37,7 @@ function Button:draw()
     love.graphics.printf(self.text, self.x, self.y + self.height / 4, self.width, "center")
 end
 
+-- Funcao 'publica' para pressionar o botao
 function Button:mousepressed(x, y, button)
     if button == 1 and self.isHovered then
         self.onClick()

@@ -1,4 +1,8 @@
-local Gamestate = require "lib.hump-master.gamestate"
+-- Arquivo de estado para mostrar a tela de derrota
+
+local Gamestate = require "lib.hump.gamestate"
+
+local image = love.graphics.newImage("assets/menus/lostImage.png")
 
 local gameover = {}
 
@@ -6,7 +10,7 @@ function gameover:load()
 end
 
 function gameover:draw()
-    love.graphics.printf("GAME OVER - Pressione Espaço para Voltar ao Menu", 0, 300, love.graphics.getWidth(), "center")
+    love.graphics.draw(image, 0, 0)
 end
 
 function gameover:keypressed(key)
