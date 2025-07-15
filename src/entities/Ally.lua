@@ -37,7 +37,7 @@ local allyTypes = {
             walk = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
             attack = function(g) return anim8.newAnimation(g('1-11', 4), 0.1) end,
             idle = function(g) return anim8.newAnimation(g('1-6', 2), 0.1) end,
-            die = function(g) return anim8.newAnimation(g('1-4', 7), 0.1) end
+            die = function(g) return anim8.newAnimation(g('1-4', 7), 0.15) end
         }
     },
     tank = {
