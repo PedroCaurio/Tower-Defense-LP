@@ -43,17 +43,13 @@ function Unit:takeDamage(dmg)
 end
 
 function Unit:update(dt)
-    if not self.alive then return end
-    
+    if not self.alive then return end   
     if self.animations[self.state] then
         self.animations[self.state]:update(dt)
     end
 end
 
-function Unit:draw()
-    if not self.alive then return end
-
-    -- A coordenada (self.x, self.y) representa a base dos pés da entidade
+function Unit:draw()    -- A coordenada (self.x, self.y) representa a base dos pés da entidade
     if self.animations and self.animations[self.state] and self.spritesheet then
         local anim = self.animations[self.state]
         
@@ -77,12 +73,18 @@ function Unit:draw()
 
     -- Barra de vida (código permanece o mesmo)
     local barWidth = 40
-    local barY = self.y - self.height - 10
-    love.graphics.setColor(0.2, 0.2, 0.2)
-    love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
-    love.graphics.setColor(0, 0.8, 0)
-    local lifeWidth = (self.health / self.maxHealth) * barWidth
-    love.graphics.rectangle("fill", self.x - barWidth / 2, barY, lifeWidth, 5)
+        local barY = self.y - self.height - 10
+        love.graphics.setColor(0.2, 0.2, 0.2)
+        love.graphics.rectangle("fill", self.x - barWidth / 2, barY, barWidth, 5)
+
+        if self.cost ~= 0 and self.cost ~= "enemy_base" then
+            love.graphics.setColor(0, 0.8, 0)
+        else
+            love.graphics.setColor(0.8, 0, 0)
+        end
+
+        local lifeWidth = (self.health / self.maxHealth) * barWidth
+        love.graphics.rectangle("fill", self.x - barWidth / 2, barY, lifeWidth, 5)
 
     love.graphics.setColor(1, 1, 1)
 end

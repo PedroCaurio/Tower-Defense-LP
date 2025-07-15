@@ -1,5 +1,5 @@
 function love.conf(t)
-	t.title = "Archer vs Mage"
+	t.title = "Defenda o Reino!"
 	t.window.icon = "assets/icon.png"
 	t.version = "11.5"
 	t.window.width = 800

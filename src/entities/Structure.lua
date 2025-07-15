@@ -55,6 +55,7 @@ function Structure.create(type, x, y, level)
         height = template.grid.h,
         health = levelData.health,
         maxHealth = levelData.health,
+        cost = type,
         color = {0.7, 0.7, 0.8},
         animations = animations,
         flipped = (type == "enemy_base"),

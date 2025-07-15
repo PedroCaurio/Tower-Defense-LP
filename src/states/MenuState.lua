@@ -4,7 +4,7 @@ menu.__index = menu
 
 
 function menu:loadAssets()
-    Background = love.graphics.newImage("assets/background/menu_1.png")
+    image = love.graphics.newImage("assets/menus/menuImage.png")
 end
 
 function menu:load()
@@ -13,8 +13,7 @@ function menu:load()
 end
 
 function menu:draw()
-    love.graphics.draw(Background, 0, 0, 0, 3, 3)
-    love.graphics.printf("MENU - Pressione Enter para Jogar", 0, 300, love.graphics.getWidth(), "center")
+    love.graphics.draw(image, 0, 0)
 end
 
 function menu:keypressed(key)
